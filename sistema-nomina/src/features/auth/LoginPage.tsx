@@ -21,9 +21,34 @@ export default function LoginPage() {
   const { errors, isSubmitting } = formState
 
   const onSubmit = async (data: FormData) => {
-    const res = await api.post('/auth/login', data)
-    login(res.data.token, res.data.role)
-    window.location.href = '/'
+    try {
+      // Mapea el formulario a los nombres del backend
+      const payload = {
+        Correo: data.username,
+        Contraseña: data.password,
+      }
+
+      // Con baseURL "/api", este path pega en /api/Auth/login
+      const res = await api.post('/Auth/login', payload)
+
+      // Backend responde con campos capitalizados
+      const { Token, Rol } = res.data as { Token: string; Rol: string }
+
+      // Tu store espera Role: 'ADMIN' | 'RRHH' | 'EMP'
+      // Backend usa "Admin", "RRHH", "Usuario" → mapeo:
+      const roleMap: Record<string, 'ADMIN' | 'RRHH' | 'EMP'> = {
+        Admin: 'ADMIN',
+        RRHH: 'RRHH',
+        Usuario: 'EMP',
+      }
+      const mappedRole = roleMap[Rol] ?? 'EMP'
+
+      login(Token, mappedRole)
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error)
+      // Aquí podrías mostrar un mensaje de error al usuario
+    }
   }
   const navigate = useNavigate()
   
