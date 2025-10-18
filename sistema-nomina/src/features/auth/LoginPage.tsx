@@ -92,22 +92,22 @@ export default function LoginPage() {
 
   {/* MAIN */}
   <main className="flex-1 flex items-center justify-center px-4 relative z-20">
-        <div className="w-full max-w-lg text-center">
+  <div className="w-full max-w-md text-center">
           {/* Escudo (usado solo en header) */}
           {/* Icono de usuario centrado */}
-          <div className="mb-4">
-            <UserIcon className="h-20 w-20 md:h-24 md:w-24 mx-auto text-[#2a4f7c]" />
+          <div className="mb-3">
+            <UserIcon className="h-16 w-16 md:h-20 md:w-20 mx-auto text-[#2a4f7c]" />
           </div>
 
           {/* Título */}
-          <h1 className="text-3xl md:text-5xl font-bold mb-8 text-slate-700">
+          <h1 className="text-2xl md:text-4xl font-bold mb-6 text-slate-700">
             Iniciar Sesión
           </h1>
 
           {/* Card del formulario */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-2 py-4 space-y-5"
+            className="px-2 py-3 space-y-4"
           >
             {/* Email */}
             <div className="relative">
@@ -115,10 +115,10 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Correo"
                 autoComplete="username"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 pr-14 py-3 text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2a4f7c]"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 pr-12 py-2.5 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2a4f7c]"
                 {...register('username')}
               />
-              <MessageIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-500" />
+              <MessageIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
               {errors.username && (
                 <p className="text-red-600 text-sm mt-1">
                   {errors.username.message}
@@ -132,10 +132,10 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Contraseña"
                 autoComplete="current-password"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 pr-14 py-3 text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2a4f7c]"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 pr-12 py-2.5 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2a4f7c]"
                 {...register('password')}
               />
-              <LockIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-500" />
+              <LockIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
               {errors.password && (
                 <p className="text-red-600 text-sm mt-1">
                   {errors.password.message}
@@ -160,7 +160,7 @@ export default function LoginPage() {
       <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-2 w-full py-3 rounded-md bg-[#2a4f7c] text-white font-semibold text-lg shadow hover:brightness-110 transition disabled:opacity-60"
+              className="mt-2 w-full py-2.5 rounded-md bg-[#2a4f7c] text-white font-semibold text-lg shadow hover:brightness-110 transition disabled:opacity-60"
             >
               {isSubmitting ? 'Ingresando…' : 'INGRESAR'}
             </button>
@@ -170,7 +170,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="text-sm text-[#2a4f7c] hover:underline"
+                className="text-base md:text-lg text-[#2a4f7c] hover:underline font-bold"
               >
                 ¿Olvidó su contraseña?
               </button>
@@ -179,7 +179,7 @@ export default function LoginPage() {
           
 
           {/* Footer */}
-          <p className="mt-10 text-xs text-slate-600 text-center">
+          <p className="mt-10 text-sm md:text-base text-slate-600 text-center font-semibold">
             2025 Sistema de Nomina y Gestion de Recursos Humanos - UMG
           </p>
         </div>

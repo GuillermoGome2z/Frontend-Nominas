@@ -1,7 +1,10 @@
 // src/mocks/browser.ts
 if (import.meta.env.DEV) {
   const { setupWorker } = await import('msw/browser')
-  const { handlers } = await import('./handlers')
+  // Import handlers robustly: support named export `handlers` or default export
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mod: any = await import('./handlers')
+  const handlers = mod.handlers ?? mod.default ?? []
   const worker = setupWorker(...handlers)
 
   // Resuelve correctamente la ruta con el base de Vite
@@ -9,5 +12,6 @@ if (import.meta.env.DEV) {
 
   await worker.start({
     serviceWorker: { url: swUrl },
+    onUnhandledRequest: 'bypass',
   })
 }
