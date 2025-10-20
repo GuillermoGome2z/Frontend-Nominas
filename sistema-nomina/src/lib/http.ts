@@ -28,9 +28,8 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     return config
   }
 
-  const token = localStorage.getItem('token')
-  if (token && token !== 'undefined' && token !== 'null') {
-    // Axios v1: headers es AxiosHeaders; usar set si existe
+  const { token } = useAuthStore.getState()
+  if (token) {
     config.headers.set?.('Authorization', `Bearer ${token}`)
     if (!config.headers.get || !config.headers.set) {
       ;(config.headers as any)['Authorization'] = `Bearer ${token}`
@@ -58,7 +57,7 @@ api.interceptors.response.use(
     if (status === 401) {
       const { logout } = useAuthStore.getState()
       logout()
-      window.location.href = '/login'
+      // No redirigimos aquí, dejamos que los componentes manejen la redirección
       return Promise.reject({ status, message })
     }
 
