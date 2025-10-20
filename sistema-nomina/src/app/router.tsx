@@ -6,6 +6,7 @@ import NotAuthorizedPage from '../pages/NotAuthorizedPage'
 import LoginPage from '../features/auth/LoginPage'
 import ForgotPasswordPage from '../features/auth/ForgotPasswordPage'
 import ProtectedRoute from '../features/auth/ProtectedRoute'
+import PublicOnlyRoute from '../features/auth/PublicOnlyRoute'
 import RoleGuard from '../features/auth/RoleGuard'
 import EmployeesListPage from '../features/employees/EmployeesListPage'
 import PayrollListPage from '../features/payroll/PayrollListPage'
@@ -13,8 +14,22 @@ import ReportsPage from '../features/reports/ReportsPage'
 import FilesPage from '../features/files/FilesPage'
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <LoginPage /> },
-  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  {
+    path: '/login',
+    element: (
+      <PublicOnlyRoute>
+        <LoginPage />
+      </PublicOnlyRoute>
+    ),
+  },
+  {
+    path: '/forgot-password',
+    element: (
+      <PublicOnlyRoute>
+        <ForgotPasswordPage />
+      </PublicOnlyRoute>
+    ),
+  },
   { path: '/403', element: <NotAuthorizedPage /> },
   {
     path: '/',
@@ -26,7 +41,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
 
-      // RRHH + ADMIN
       {
         path: 'empleados',
         element: (
@@ -35,7 +49,6 @@ export const router = createBrowserRouter([
           </RoleGuard>
         ),
       },
-      // Solo ADMIN
       {
         path: 'nomina',
         element: (
@@ -44,7 +57,6 @@ export const router = createBrowserRouter([
           </RoleGuard>
         ),
       },
-      // RRHH + ADMIN
       {
         path: 'reportes',
         element: (
@@ -53,7 +65,6 @@ export const router = createBrowserRouter([
           </RoleGuard>
         ),
       },
-      // RRHH + ADMIN
       {
         path: 'expedientes',
         element: (
