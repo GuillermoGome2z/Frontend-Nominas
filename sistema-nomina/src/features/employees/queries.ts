@@ -19,13 +19,13 @@ export function useEmployeesList(params?: {
   fechaFin?: string
 }) {
   return useQuery<EmployeeDTO[]>({
-    queryKey: ['employees', params],
-    queryFn: () => fetchEmployees(params),
-  })
+  queryKey: ['employees', params],
+  queryFn: () => fetchEmployees(params),
+})
 }
 
 export function useEmployeeDetail(id: number) {
-  return useQuery<EmployeeDTO>({
+  return useQuery({
     queryKey: ['employees', id],
     queryFn: () => fetchEmployeeById(id),
     enabled: Number.isFinite(id),
