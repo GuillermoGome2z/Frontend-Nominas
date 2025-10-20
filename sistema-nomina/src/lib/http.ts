@@ -11,7 +11,7 @@ function computeBaseURL() {
   return '/api'
 }
 
-// Exporta el cliente que usa el resto del proyecto
+// Cliente Axios
 export const api = axios.create({
   baseURL: computeBaseURL(),
   // timeout: 15000,
@@ -23,28 +23,25 @@ export const api = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const path = (config.url || '').toLowerCase()
 
+  // Si es login/refresh, no tocar headers
   if (path.includes('/auth/login') || path.includes('/auth/refresh')) {
     return config
   }
 
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
-    // En Axios v1 los headers ya son un objeto de tipo AxiosHeaders,
-    // podemos asignar directamente:
+    // Axios v1: headers es AxiosHeaders; usar set si existe
     config.headers.set?.('Authorization', `Bearer ${token}`)
-    // fallback si set no existe (algunos bundlers viejos):
     if (!config.headers.get || !config.headers.set) {
       ;(config.headers as any)['Authorization'] = `Bearer ${token}`
     }
   }
 
+  // ✅ devolver siempre config
   return config
 })
 
 // ===================== RESPONSE INTERCEPTOR =====================
-// - 401: logout y redirect a /login (no reintentar)
-// - 403/422: propaga con mensaje y (si hay) errors de validación
-// - Otros: propaga status + message amigable
 api.interceptors.response.use(
   (res) => res,
   (err: AxiosError<any>) => {
@@ -79,3 +76,4 @@ api.interceptors.response.use(
     })
   }
 )
+

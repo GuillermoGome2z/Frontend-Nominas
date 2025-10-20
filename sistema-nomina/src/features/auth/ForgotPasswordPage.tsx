@@ -21,21 +21,25 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center p-6 relative">
       <div className="fixed inset-0 z-0 bg-no-repeat bg-center bg-cover" style={{ backgroundImage: "url('/img/login2.png')" }} />
 
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 relative z-20 -translate-y-40 md:-translate-y-64">
-        <h2 className="text-center text-3xl font-semibold mb-4">¿Olvidó su contraseña?</h2>
+  <div className="max-w-md w-full relative z-20 -translate-y-40 md:-translate-y-64">
+        {!showModal && (
+          <div className="bg-white shadow-lg rounded-lg p-6">
+            <h2 className="text-center text-3xl font-semibold mb-4">¿Olvidó su contraseña?</h2>
 
-        <form onSubmit={onSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Dirección de correo</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-red-300" placeholder="correo@dominio.com" required />
+            <form onSubmit={onSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Dirección de correo</label>
+                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-red-300" placeholder="correo@dominio.com" required />
+              </div>
+
+              <button type="submit" className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-md text-lg font-medium transition-colors">Enviar correo</button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <button type="button" onClick={() => navigate('/login')} className="text-sm text-blue-600 hover:underline">Volver a Iniciar sesión</button>
+            </div>
           </div>
-
-          <button type="submit" className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-md text-lg font-medium transition-colors">Enviar correo</button>
-        </form>
-
-        <div className="mt-4 text-center">
-          <button type="button" onClick={() => navigate('/login')} className="text-sm text-blue-600 hover:underline">Volver a Iniciar sesión</button>
-        </div>
+        )}
 
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
