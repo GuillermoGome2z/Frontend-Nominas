@@ -1,15 +1,24 @@
 @import "tailwindcss";
 
-/* Reset mínimo compatible con Tailwind */
+/* Altura total y reset mínimo */
 html, body, #root {
   height: 100%;
   margin: 0;
 }
 
-/* Fondo claro por defecto; quita el fondo oscuro del template de Vite */
+/* Fondo claro global (igual que bg-gray-50) */
 body {
-  background: #f8fafc; /* opcional: usa bg-gray-50 */
+  background: #f8fafc;
+  color: #0f172a; /* slate-900 */
 }
 
-/* No uses display:flex ni place-items en body aquí.
-   Las páginas (como Login) controlan su propio layout. */
+/* Utilidad para contenedores de página */
+.container-app {
+  max-width: 80rem; /* ~1280px */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+@media (min-width: 640px) {
+  .container-app { padding: 1.5rem; }
+}
