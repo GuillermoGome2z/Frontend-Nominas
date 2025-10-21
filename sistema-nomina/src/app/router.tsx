@@ -73,7 +73,11 @@ export const router = createBrowserRouter([
           </RoleGuard>
         ),
       },
+
+      // Catch-all para 404 reales (rutas no definidas)
+      { path: '*', element: <NotFoundPage /> },
     ],
+    // Puedes mantener errorElement si lo usas con loaders/actions
     errorElement: <NotFoundPage />,
   },
 ])
