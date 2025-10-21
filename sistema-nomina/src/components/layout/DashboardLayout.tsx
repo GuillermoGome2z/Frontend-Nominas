@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import Navbar from '../layout/Navbar';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -7,9 +6,8 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="p-6">{children}</main>
-    </div>
+    <section className="max-w-7xl mx-auto p-4 sm:p-6">
+      {children}
+    </section>
   );
 }

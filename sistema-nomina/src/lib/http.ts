@@ -58,12 +58,12 @@ api.interceptors.response.use(
     if (status === 401) {
       const { logout } = useAuthStore.getState()
       logout()
- Guillermo
+
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login'
       }
       // No redirigimos aquí, dejamos que los componentes manejen la redirección
- main
+
       return Promise.reject({ status, message })
     }
 
