@@ -1,51 +1,55 @@
-import { useQuery } from '@tanstack/react-query'
-import { api } from '../../lib/http'
-
-type Employee = {
-  id: number
-  name: string
-  department: string
-}
-
-type ApiList<T> = {
-  data: T[]
-  meta: { total: number }
-}
+import { useState } from 'react';
+import { useEmployees, useDeleteEmployee } from './hooks';
+import Toolbar from './components/Toolbar';
+import EmployeesTable from './components/EmployeesTable';
+import Pagination from './components/Pagination';
+import ConfirmDialog from './components/ConfirmDialog';
+import { useNavigate } from 'react-router-dom';
 
 export default function EmployeesListPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['employees'],
-    queryFn: async () => {
-      const res = await api.get<ApiList<Employee>>('/employees')
-      return res.data
-    },
-  })
+  const [filters, setFilters] = useState({ page: 1, pageSize: 10 } as any);
+  const { data, isLoading, isError } = useEmployees(filters);
+  const del = useDeleteEmployee();
+  const nav = useNavigate();
+  const [toDelete, setToDelete] = useState<number | null>(null);
 
-  if (isLoading) return <p>Cargando empleados…</p>
-  if (isError) return <p>Error al cargar empleados</p>
+  const total = data?.meta.total ?? 0;
+  const rows = data?.data ?? [];
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Empleados</h1>
-      <table className="min-w-full border bg-white">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border px-3 py-2 text-left">ID</th>
-            <th className="border px-3 py-2 text-left">Nombre</th>
-            <th className="border px-3 py-2 text-left">Departamento</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data!.data.map((emp) => (
-            <tr key={emp.id} className="hover:bg-gray-50">
-              <td className="border px-3 py-2">{emp.id}</td>
-              <td className="border px-3 py-2">{emp.name}</td>
-              <td className="border px-3 py-2">{emp.department}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="text-sm text-gray-500 mt-2">Total: {data!.meta.total}</p>
-    </div>
-  )
+    <section className="p-2 sm:p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Empleados</h1>
+      </div>
+
+      <Toolbar
+        onFilter={(f)=> setFilters((prev:any)=> ({ ...prev, page: 1, ...f }))}
+        onCreate={()=> nav('/empleados/nuevo')}
+      />
+
+      {isLoading && <div className="mt-6 animate-pulse rounded-2xl border p-6">Cargando…</div>}
+      {isError && <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700">Error al cargar empleados.</div>}
+      {!isLoading && !isError && (
+        <>
+          <EmployeesTable rows={rows} onDelete={(id)=> setToDelete(id)} />
+          <Pagination
+            page={filters.page} pageSize={filters.pageSize} total={total}
+            onPageChange={(p)=> setFilters((prev:any)=> ({ ...prev, page: p }))}
+          />
+        </>
+      )}
+
+      <ConfirmDialog
+        open={toDelete != null}
+        setOpen={(v) => !v && setToDelete(null)}
+        title="Eliminar empleado"
+        description="Esta acción no se puede deshacer."
+        onCancel={()=> setToDelete(null)}
+        onConfirm={()=> {
+          if (toDelete == null) return;
+          del.mutate(toDelete, { onSettled: ()=> setToDelete(null) });
+        }}
+      />
+    </section>
+);
 }
