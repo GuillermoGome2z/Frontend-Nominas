@@ -54,10 +54,16 @@ api.interceptors.response.use(
       (typeof (data as any)?.Message === 'string' && (data as any).Message) ||
       'Ocurrió un error inesperado. Intente nuevamente.'
 
+    // Evitar posible bucle si ya estás en /login
     if (status === 401) {
       const { logout } = useAuthStore.getState()
       logout()
+ Guillermo
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
       // No redirigimos aquí, dejamos que los componentes manejen la redirección
+ main
       return Promise.reject({ status, message })
     }
 
@@ -69,10 +75,11 @@ api.interceptors.response.use(
       return Promise.reject({ status, message })
     }
 
+    // Network error / CORS / servidor caído
     return Promise.reject({
       status: 0,
-      message: 'No fue posible conectar con el servidor.',
+      message:
+        'No fue posible conectar con el servidor. Verifica que el backend esté arriba y que VITE_API_URL apunte correctamente.',
     })
   }
 )
-

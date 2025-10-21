@@ -58,6 +58,40 @@ export const router = createBrowserRouter([
         <RoleGuard roles={['ADMIN', 'RRHH']}>
           <Shell>
             <EmployeesListPage />
+ Guillermo
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nomina',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PayrollListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'reportes',
+        element: (
+          <RoleGuard roles={['ADMIN', 'RRHH']}>
+            <ReportsPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'expedientes',
+        element: (
+          <RoleGuard roles={['ADMIN', 'RRHH']}>
+            <FilesPage />
+          </RoleGuard>
+        ),
+      },
+
+      // Catch-all para 404 reales (rutas no definidas)
+      { path: '*', element: <NotFoundPage /> },
+    ],
+    // Puedes mantener errorElement si lo usas con loaders/actions
+    errorElement: <NotFoundPage />,
           </Shell>
         </RoleGuard>
       </PrivateRoute>
