@@ -36,7 +36,7 @@ export interface EmployeesListResponse {
   meta: { total: number; page: number; pageSize: number }
 }
 
-/* ======================= Mapeos helper ======================= */
+/* ======================= Helpers ======================= */
 
 function mapEmpleado(x: any): EmployeeDTO {
   return {
@@ -58,14 +58,50 @@ function mapEmpleado(x: any): EmployeeDTO {
   }
 }
 
+/** Convierte cualquier fecha razonable a ISO (lo que ASP.NET parsea sin problemas). */
+function toIso(d?: string | Date | null): string | undefined {
+  if (!d) return undefined
+  if (d instanceof Date) return d.toISOString()
+
+  const s = String(d).trim()
+  // ya viene ISO-ish
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const t = Date.parse(s)
+    return Number.isNaN(t) ? undefined : new Date(t).toISOString()
+  }
+  // dd/MM/yyyy
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (m) {
+    const [, dd, mm, yyyy] = m
+    const dt = new Date(Number(yyyy), Number(mm) - 1, Number(dd))
+    return dt.toISOString()
+  }
+  // cualquier cosa parseable
+  const t = Date.parse(s)
+  return Number.isNaN(t) ? undefined : new Date(t).toISOString()
+}
+
+/** Devuelve string amigable si el backend respondió ValidationProblemDetails (422). */
+export function parseValidationError(e: any): string | null {
+  const vpd = e?.response?.data
+  if (vpd?.errors && typeof vpd.errors === 'object') {
+    const lines = Object.entries(vpd.errors).map(([k, v]: any) =>
+      `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`
+    )
+    return lines.join('\n')
+  }
+  if (typeof vpd?.title === 'string') return vpd.title
+  return null
+}
+
 /* ======================= API: Empleados ======================= */
 
 export async function listEmployees(filters: EmployeeFilters = {}): Promise<EmployeesListResponse> {
   const params = new URLSearchParams()
   if (filters.q) params.set('q', filters.q)
   if (filters.departamentoId) params.set('departamentoId', String(filters.departamentoId))
-  if (filters.fechaInicio) params.set('fechaInicio', filters.fechaInicio)
-  if (filters.fechaFin) params.set('fechaFin', filters.fechaFin)
+  if (filters.fechaInicio) params.set('fechaInicio', toIso(filters.fechaInicio) ?? '')
+  if (filters.fechaFin) params.set('fechaFin', toIso(filters.fechaFin) ?? '')
   params.set('page', String(filters.page ?? 1))
   params.set('pageSize', String(filters.pageSize ?? 10))
 
@@ -87,22 +123,47 @@ export async function getEmployee(id: number): Promise<EmployeeDTO> {
 }
 
 export async function createEmployee(payload: Partial<EmployeeDTO>) {
-  // Backend espera EmpleadoCreacionDto (nombres PascalCase)
+  // --- Coerciones seguras ---
+  const salario = Number(payload.salarioMensual)
+  const depId = payload.departamentoId != null ? Number(payload.departamentoId) : undefined
+  const pstId = payload.puestoId != null ? Number(payload.puestoId) : undefined
+
+  // --- Validaciones mínimas en FE ---
+  if (!payload.nombreCompleto?.trim()) throw new Error('El nombre es obligatorio.')
+  if (!payload.correo?.trim()) throw new Error('El correo es obligatorio.')
+  if (!payload.dpi?.trim()) throw new Error('El DPI es obligatorio.')
+  if (!payload.nit?.trim()) throw new Error('El NIT es obligatorio.')
+  if (!payload.telefono?.trim()) throw new Error('El teléfono es obligatorio.')
+  if (!payload.direccion?.trim()) throw new Error('La dirección es obligatoria.')
+
+  const fnIso = toIso(payload.fechaNacimiento)
+  const fcIso = toIso(payload.fechaContratacion)
+  if (!fnIso) throw new Error('La fecha de nacimiento es obligatoria y debe ser válida.')
+  if (!fcIso) throw new Error('La fecha de contratación es obligatoria y debe ser válida.')
+
+  if (!payload.estadoLaboral) throw new Error('El estado laboral es obligatorio.')
+  if (!Number.isFinite(salario) || salario <= 0)
+    throw new Error('El salario mensual es obligatorio y debe ser mayor a 0.')
+  if (!Number.isFinite(depId!)) throw new Error('Debes seleccionar un departamento válido.')
+  if (!Number.isFinite(pstId!)) throw new Error('Debes seleccionar un puesto válido.')
+
+  // --- Cuerpo en PascalCase como espera EmpleadoCreacionDto ---
   const body = {
-    NombreCompleto: payload.nombreCompleto,
-    DPI: payload.dpi,
-    NIT: payload.nit,
-    Correo: payload.correo,
-    Telefono: payload.telefono,
-    Direccion: payload.direccion,
-    FechaNacimiento: payload.fechaNacimiento,
-    FechaContratacion: payload.fechaContratacion,
-    EstadoLaboral: payload.estadoLaboral,
-    SalarioBase: payload.salarioMensual, // ← en POST tu backend usa SalarioBase
-    DepartamentoId: payload.departamentoId ?? 0,
-    PuestoId: payload.puestoId,
+    NombreCompleto: payload.nombreCompleto.trim(),
+    DPI: payload.dpi.trim(),
+    NIT: payload.nit.trim(),
+    Correo: payload.correo.trim(),
+    Telefono: payload.telefono.trim(),
+    Direccion: payload.direccion.trim(),
+    FechaNacimiento: fnIso,                // ISO siempre
+    FechaContratacion: fcIso,              // ISO siempre
+    EstadoLaboral: payload.estadoLaboral,  // "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
+    SalarioBase: Number(salario.toFixed(2)),
+    DepartamentoId: depId,
+    PuestoId: pstId,
   }
-  const res = await api.post('/Empleados', body) // 201
+
+  const res = await api.post('/Empleados', body)
   return res.data
 }
 
@@ -115,8 +176,8 @@ export async function updateEmployee(id: number, payload: Partial<EmployeeDTO>) 
     Correo: payload.correo,
     Telefono: payload.telefono,
     Direccion: payload.direccion,
-    FechaNacimiento: payload.fechaNacimiento,
-    FechaContratacion: payload.fechaContratacion,
+    FechaNacimiento: toIso(payload.fechaNacimiento),
+    FechaContratacion: toIso(payload.fechaContratacion),
     EstadoLaboral: payload.estadoLaboral,
     SalarioMensual: payload.salarioMensual,
     DepartamentoId: payload.departamentoId ?? 0,
@@ -131,7 +192,7 @@ export async function deleteEmployee(id: number) {
   return res.status
 }
 
-/** Toggle ACTIVO/SUSPENDIDO sin tocar backend (reusa PUT completo) */
+/** Toggle ACTIVO/SUSPENDIDO (reusa PUT completo) */
 export async function setEmployeeActive(id: number, activo: boolean) {
   const current = await getEmployee(id)
   const body = {
@@ -142,8 +203,8 @@ export async function setEmployeeActive(id: number, activo: boolean) {
     Correo: current.correo,
     Telefono: current.telefono,
     Direccion: current.direccion,
-    FechaNacimiento: current.fechaNacimiento,
-    FechaContratacion: current.fechaContratacion,
+    FechaNacimiento: toIso(current.fechaNacimiento),
+    FechaContratacion: toIso(current.fechaContratacion),
     EstadoLaboral: activo ? 'ACTIVO' : 'SUSPENDIDO',
     SalarioMensual: current.salarioMensual,
     DepartamentoId: current.departamentoId ?? 0,
