@@ -38,23 +38,49 @@ export interface EmployeesListResponse {
 
 /* ======================= Helpers ======================= */
 
+/** Upper seguro para strings que pueden venir en minúsculas o capitalizadas */
+function up(s?: string | null): string | undefined {
+  return typeof s === 'string' ? s.toUpperCase() : undefined
+}
+
+/** Convierte cualquier “shape” del backend a nuestro DTO camelCase */
 function mapEmpleado(x: any): EmployeeDTO {
+  // salario puede venir como SalarioMensual ó SalarioBase (algunas proyecciones)
+  const salario =
+    x.salarioMensual ?? x.SalarioMensual ?? x.salarioBase ?? x.SalarioBase
+
+  // estado puede venir "Activo" | "SUSPENDIDO" | etc.
+  const estadoRaw = x.estadoLaboral ?? x.EstadoLaboral
+  const estado: EstadoLaboral | undefined =
+    up(estadoRaw) === 'ACTIVO' || up(estadoRaw) === 'SUSPENDIDO' || up(estadoRaw) === 'RETIRADO'
+      ? (up(estadoRaw) as EstadoLaboral)
+      : undefined
+
   return {
-    id: x.Id,
-    nombreCompleto: x.NombreCompleto,
-    dpi: x.DPI,
-    nit: x.NIT,
-    correo: x.Correo,
-    direccion: x.Direccion,
-    telefono: x.Telefono,
-    fechaContratacion: x.FechaContratacion,
-    fechaNacimiento: x.FechaNacimiento,
-    estadoLaboral: x.EstadoLaboral,
-    salarioMensual: x.SalarioMensual,
-    departamentoId: x.DepartamentoId,
-    puestoId: x.PuestoId,
-    nombreDepartamento: x.NombreDepartamento,
-    nombrePuesto: x.NombrePuesto,
+    id:
+      x.id ?? x.Id ?? x.idEmpleado ?? x.IdEmpleado ?? 0,
+    nombreCompleto:
+      x.nombreCompleto ?? x.NombreCompleto ?? x.nombre ?? x.Nombre ?? '',
+    dpi: x.dpi ?? x.DPI ?? '',
+    nit: x.nit ?? x.NIT ?? '',
+    correo: x.correo ?? x.Correo ?? '',
+    direccion: x.direccion ?? x.Direccion ?? '',
+    telefono: x.telefono ?? x.Telefono ?? '',
+    fechaContratacion:
+      x.fechaContratacion ?? x.FechaContratacion ?? undefined,
+    fechaNacimiento:
+      x.fechaNacimiento ?? x.FechaNacimiento ?? undefined,
+    estadoLaboral: estado,
+    salarioMensual: Number.isFinite(Number(salario))
+      ? Number(salario)
+      : undefined,
+    departamentoId:
+      x.departamentoId ?? x.DepartamentoId ?? undefined,
+    puestoId: x.puestoId ?? x.PuestoId ?? undefined,
+    nombreDepartamento:
+      x.nombreDepartamento ?? x.NombreDepartamento ?? undefined,
+    nombrePuesto:
+      x.nombrePuesto ?? x.NombrePuesto ?? undefined,
   }
 }
 
@@ -96,6 +122,11 @@ export function parseValidationError(e: any): string | null {
 
 /* ======================= API: Empleados ======================= */
 
+/**
+ * Acepta tanto:
+ *  - Respuesta como ARRAY (y total en header X-Total-Count)
+ *  - Respuesta como OBJETO { items/data/lista/Lista: [...], total/Total: n }
+ */
 export async function listEmployees(filters: EmployeeFilters = {}): Promise<EmployeesListResponse> {
   const params = new URLSearchParams()
   if (filters.q) params.set('q', filters.q)
@@ -106,14 +137,36 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Empl
   params.set('pageSize', String(filters.pageSize ?? 10))
 
   const res = await api.get(`/Empleados?${params.toString()}`)
-  const rawTotal = (res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count'] ?? 0) as number | string
-  const total = typeof rawTotal === 'string' ? Number(rawTotal) : Number(rawTotal)
 
-  const data = Array.isArray(res.data) ? (res.data as any[]).map(mapEmpleado) : []
+  // 1) Intento 1: header
+  const rawHeaderTotal = (res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count']) as number | string | undefined
+  let totalFromHeader = 0
+  if (typeof rawHeaderTotal === 'string') totalFromHeader = Number(rawHeaderTotal)
+  else if (typeof rawHeaderTotal === 'number') totalFromHeader = rawHeaderTotal
+
+  // 2) Cuerpo puede ser array o envoltura
+  const body = res.data
+  const itemsRaw: any[] =
+    Array.isArray(body)
+      ? body
+      : (body?.items ?? body?.Items ?? body?.data ?? body?.Data ?? body?.lista ?? body?.Lista ?? [])
+
+  const totalFromBody =
+    (body?.total ?? body?.Total ?? body?.count ?? body?.Count ?? itemsRaw.length) as number
+
+  const total = Number.isFinite(totalFromHeader) && totalFromHeader > 0
+    ? totalFromHeader
+    : (Number.isFinite(totalFromBody) ? totalFromBody : itemsRaw.length)
+
+  const data = Array.isArray(itemsRaw) ? itemsRaw.map(mapEmpleado) : []
 
   return {
     data,
-    meta: { total: Number.isFinite(total) ? total : 0, page: filters.page ?? 1, pageSize: filters.pageSize ?? 10 },
+    meta: {
+      total,
+      page: filters.page ?? (body?.page ?? body?.Page ?? 1),
+      pageSize: filters.pageSize ?? (body?.pageSize ?? body?.PageSize ?? data.length),
+    },
   }
 }
 
@@ -148,22 +201,23 @@ export async function createEmployee(payload: Partial<EmployeeDTO>) {
   if (!Number.isFinite(pstId!)) throw new Error('Debes seleccionar un puesto válido.')
 
   // --- Cuerpo en PascalCase como espera EmpleadoCreacionDto ---
-  const body = {
-    NombreCompleto: payload.nombreCompleto.trim(),
-    DPI: payload.dpi.trim(),
-    NIT: payload.nit.trim(),
-    Correo: payload.correo.trim(),
-    Telefono: payload.telefono.trim(),
-    Direccion: payload.direccion.trim(),
-    FechaNacimiento: fnIso,                // ISO siempre
-    FechaContratacion: fcIso,              // ISO siempre
-    EstadoLaboral: payload.estadoLaboral,  // "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
-    SalarioBase: Number(salario.toFixed(2)),
+   const body = {
+    NombreCompleto: payload.nombreCompleto!.trim(),
+    DPI: payload.dpi!.trim(),
+    NIT: payload.nit!.trim(),
+    Correo: payload.correo!.trim(),
+    Telefono: payload.telefono!.trim(),
+    Direccion: payload.direccion!.trim(),
+    FechaNacimiento: toIso(payload.fechaNacimiento)!,
+    FechaContratacion: toIso(payload.fechaContratacion)!,
+    EstadoLaboral: payload.estadoLaboral,
+    SalarioMensual: Number(salario.toFixed(2)),   // ⟵ unificado
     DepartamentoId: depId,
     PuestoId: pstId,
   }
 
   const res = await api.post('/Empleados', body)
+  // Algunas APIs devuelven { mensaje, empleadoId }, otras devuelven el objeto
   return res.data
 }
 
@@ -234,14 +288,14 @@ export interface EmployeeDocsResponse {
 
 function mapDoc(x: any): EmployeeDocDTO {
   return {
-    id: x.Id,
-    empleadoId: x.EmpleadoId,
-    tipoDocumentoId: x.TipoDocumentoId,
-    nombreOriginal: x.NombreOriginal,
-    rutaArchivo: x.RutaArchivo,
-    fechaSubida: x.FechaSubida,
-    nombreTipo: x.NombreTipo,
-    nombreEmpleado: x.NombreEmpleado,
+    id: x.id ?? x.Id,
+    empleadoId: x.empleadoId ?? x.EmpleadoId,
+    tipoDocumentoId: x.tipoDocumentoId ?? x.TipoDocumentoId,
+    nombreOriginal: x.nombreOriginal ?? x.NombreOriginal,
+    rutaArchivo: x.rutaArchivo ?? x.RutaArchivo,
+    fechaSubida: x.fechaSubida ?? x.FechaSubida,
+    nombreTipo: x.nombreTipo ?? x.NombreTipo,
+    nombreEmpleado: x.nombreEmpleado ?? x.NombreEmpleado,
   }
 }
 
@@ -255,8 +309,10 @@ export async function listEmployeeDocs(
   const res = await api.get(`/DocumentosEmpleado`, { params: { empleadoId, page, pageSize } })
   const rawTotal = (res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count'] ?? 0) as number | string
   const total = typeof rawTotal === 'string' ? Number(rawTotal) : Number(rawTotal)
-  const data = Array.isArray(res.data) ? (res.data as any[]).map(mapDoc) : []
-  return { data, meta: { total: Number.isFinite(total) ? total : 0, page, pageSize } }
+  const body = res.data
+  const arr = Array.isArray(body) ? body : (body?.items ?? body?.Items ?? body?.data ?? body?.Data ?? [])
+  const data = Array.isArray(arr) ? arr.map(mapDoc) : []
+  return { data, meta: { total: Number.isFinite(total) ? total : data.length, page, pageSize } }
 }
 
 export async function uploadEmployeeDoc(empleadoId: number, file: File, tipoDocumentoId: number) {

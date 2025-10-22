@@ -8,6 +8,7 @@ import ForgotPasswordPage from '../features/auth/ForgotPasswordPage'
 import ProtectedRoute from '../features/auth/ProtectedRoute'
 import PublicOnlyRoute from '../features/auth/PublicOnlyRoute'
 import RoleGuard from '../features/auth/RoleGuard'
+import AccountSettingsPage from '@/features/account/AccountSettingsPage'
 
 import EmployeesListPage from '../features/employees/EmployeesListPage'
 import EmployeeCreatePage from '../features/employees/EmployeeCreatePage'
@@ -95,6 +96,8 @@ export const router = createBrowserRouter([
         ),
       },
 
+      { path: 'perfil', element: <AccountSettingsPage /> },
+      
       // ----- Departamentos -----
       {
         path: 'departamentos',
