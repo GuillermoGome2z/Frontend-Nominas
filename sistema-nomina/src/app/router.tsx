@@ -12,6 +12,9 @@ import EmployeesListPage from '../features/employees/EmployeesListPage'
 import PayrollListPage from '../features/payroll/PayrollListPage'
 import ReportsPage from '../features/reports/ReportsPage'
 import FilesPage from '../features/files/FilesPage'
+import EmployeeCreatePage from '../features/employees/EmployeeCreatePage'
+import EmployeeDetailPage from '../features/employees/EmployeeDetailPage'
+import EmployeeEditPage from '../features/employees/EmployeeEditPage'
 
 export const router = createBrowserRouter([
   {
@@ -39,44 +42,69 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
+  { index: true, element: <DashboardPage /> },
 
-      {
-        path: 'empleados',
-        element: (
-          <RoleGuard roles={['ADMIN', 'RRHH']}>
-            <EmployeesListPage />
-          </RoleGuard>
-        ),
-      },
-      {
-        path: 'nomina',
-        element: (
-          <RoleGuard roles={['ADMIN']}>
-            <PayrollListPage />
-          </RoleGuard>
-        ),
-      },
-      {
-        path: 'reportes',
-        element: (
-          <RoleGuard roles={['ADMIN', 'RRHH']}>
-            <ReportsPage />
-          </RoleGuard>
-        ),
-      },
-      {
-        path: 'expedientes',
-        element: (
-          <RoleGuard roles={['ADMIN', 'RRHH']}>
-            <FilesPage />
-          </RoleGuard>
-        ),
-      },
+  {
+    path: 'empleados',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <EmployeesListPage />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: 'empleados/nuevo',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <EmployeeCreatePage />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: 'empleados/:id',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <EmployeeDetailPage />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: 'empleados/:id/editar',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <EmployeeEditPage />
+      </RoleGuard>
+    ),
+  },
 
-      // Catch-all para 404 reales (rutas no definidas)
-      { path: '*', element: <NotFoundPage /> },
-    ],
+  {
+    path: 'nomina',
+    element: (
+      <RoleGuard roles={['ADMIN']}>
+        <PayrollListPage />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: 'reportes',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <ReportsPage />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: 'expedientes',
+    element: (
+      <RoleGuard roles={['ADMIN', 'RRHH']}>
+        <FilesPage />
+      </RoleGuard>
+    ),
+  },
+
+  { path: '*', element: <NotFoundPage /> },
+],
+
     // Puedes mantener errorElement si lo usas con loaders/actions
     errorElement: <NotFoundPage />,
   },
