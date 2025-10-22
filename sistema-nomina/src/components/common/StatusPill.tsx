@@ -1,59 +1,28 @@
+// src/components/common/StatusPill.tsx
+type Props =
+  | { value: boolean; labelTrue?: string; labelFalse?: string }
+  | { value: string | null | undefined };
 
-
-type Props = {
-  value: string | boolean | null | undefined
-  labelMap?: Record<string, string>   // Ej: { ACTIVO: 'Activo', INACTIVO: 'Inactivo' }
-}
-
-/**
- * Muestra una pequeña etiqueta con color dependiendo del estado.
- * 
- * Uso:
- *  <StatusPill value={empleado.estadoLaboral} />
- *  <StatusPill value={departamento.activo} />
- */
-export default function StatusPill({ value, labelMap }: Props) {
-  if (value === null || value === undefined)
-    return <span className="inline-flex rounded-full border px-2 py-0.5 text-xs text-gray-400">—</span>
-
-  let text = ''
-  let colorClass = ''
-
-  // Normalizamos el valor
-  const v = typeof value === 'string' ? value.trim().toUpperCase() : value
-
-  if (typeof v === 'boolean') {
-    text = v ? 'Activo' : 'Inactivo'
-    colorClass = v
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      : 'bg-gray-50 text-gray-600 border-gray-200'
-  } else if (typeof v === 'string') {
-    const mapped = labelMap?.[v] ?? v
-    text = mapped.charAt(0).toUpperCase() + mapped.slice(1).toLowerCase()
-    switch (v) {
-      case 'ACTIVO':
-        colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200'
-        break
-      case 'INACTIVO':
-      case 'SUSPENDIDO':
-        colorClass = 'bg-gray-50 text-gray-600 border-gray-200'
-        break
-      case 'VACACIONES':
-        colorClass = 'bg-amber-50 text-amber-700 border-amber-200'
-        break
-      case 'LICENCIA':
-        colorClass = 'bg-sky-50 text-sky-700 border-sky-200'
-        break
-      default:
-        colorClass = 'bg-gray-50 text-gray-600 border-gray-200'
-    }
+export default function StatusPill(props: Props) {
+  const base =
+    'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium';
+  if (typeof (props as any).value === 'boolean') {
+    const v = (props as any).value as boolean;
+    const cls = v
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : 'border-gray-200 bg-gray-50 text-gray-600';
+    const label = v
+      ? (props as any).labelTrue ?? 'Activo'
+      : (props as any).labelFalse ?? 'Inactivo';
+    return <span className={`${base} ${cls}`}>{label}</span>;
   }
 
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${colorClass}`}
-    >
-      {text}
-    </span>
-  )
+  const s = String((props as any).value ?? '').toUpperCase();
+  const map: Record<string, string> = {
+    ACTIVO: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    SUSPENDIDO: 'border-amber-200 bg-amber-50 text-amber-700',
+    RETIRADO: 'border-rose-200 bg-rose-50 text-rose-700',
+  };
+  const cls = map[s] ?? 'border-gray-200 bg-gray-50 text-gray-600';
+  return <span className={`${base} ${cls}`}>{s || '—'}</span>;
 }

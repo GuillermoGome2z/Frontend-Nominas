@@ -18,6 +18,9 @@ import type {
   EmployeeFilters,
 } from './api'
 
+// Normalizadores para la vista (lista)
+import { extractItems, normalizeEmployee } from './normalize'
+
 /* ======================= Empleados ======================= */
 
 // LISTA (paginación + filtros)
@@ -130,5 +133,35 @@ export function useEmployeeDocSignedUrl(
       documentoId > 0,
     staleTime: 0,
     gcTime: 0,
+  })
+}
+
+/* ======================= Vista normalizada (lista) ======================= */
+
+export function useEmployeesView(filters: EmployeeFilters) {
+  return useQuery({
+    queryKey: ['employees:view', filters] as const,
+    queryFn: async () => {
+      // Tratamos el resultado como dinámico porque la API puede variar su shape
+      const raw: any = await listEmployees(filters)
+
+      const items = extractItems(raw)
+      const rows = items.map(normalizeEmployee)
+
+      // Paginación “opcional”: tomamos lo que exista; si no, derivamos
+      const total =
+        (raw?.total ?? raw?.Total ?? raw?.data?.total ?? raw?.data?.Total) ?? rows.length
+      const page =
+        ((filters as any)?.page ?? raw?.page ?? raw?.Page ?? raw?.data?.page) ?? 1
+      const pageSize =
+        ((filters as any)?.pageSize ??
+          raw?.pageSize ??
+          raw?.PageSize ??
+          raw?.data?.pageSize) ?? rows.length
+
+      return { rows, total: Number(total) || rows.length, page: Number(page) || 1, pageSize: Number(pageSize) || rows.length }
+    },
+    staleTime: 30_000,
+    placeholderData: (prev) => prev,
   })
 }

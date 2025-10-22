@@ -29,6 +29,7 @@ export default function EmployeesTable({ rows, onToggle }: Props) {
             <th className="px-4 py-3">ID</th>
             <th className="px-4 py-3">Nombre</th>
             <th className="px-4 py-3">Departamento</th>
+            <th className="px-4 py-3">Puesto</th> {/* ⟵ nueva */}
             <th className="px-4 py-3">Estado</th>
             <th className="px-4 py-3">Salario</th>
             <th className="px-4 py-3 text-right">Acciones</th>
@@ -36,31 +37,38 @@ export default function EmployeesTable({ rows, onToggle }: Props) {
         </thead>
         <tbody className="text-sm">
           {rows.map((e, idx) => {
-            const activo = (e.estadoLaboral ?? 'ACTIVO') === 'ACTIVO'
+            const hasId = Number.isFinite(e?.id) && Number(e.id) > 0
+            const activo = (e?.estadoLaboral ?? 'ACTIVO') === 'ACTIVO'
             const toggleLabel = activo ? 'Desactivar' : 'Activar'
             return (
-              <tr key={e.id} className={idx % 2 ? 'bg-white' : 'bg-gray-50/30'}>
-                <td className="px-4 py-3">{e.id}</td>
-                <td className="px-4 py-3">{e.nombreCompleto}</td>
-                <td className="px-4 py-3">{e.nombreDepartamento ?? '—'}</td>
-                <td className="px-4 py-3">
-                  <StatusPill value={e.estadoLaboral} />
-                </td>
-                <td className="px-4 py-3">{fmtCurrency(e.salarioMensual)}</td>
+              <tr key={hasId ? e.id : `row-${idx}`} className={idx % 2 ? 'bg-white' : 'bg-gray-50/30'}>
+                <td className="px-4 py-3">{hasId ? e.id : '—'}</td>
+                <td className="px-4 py-3">{e?.nombreCompleto || '—'}</td>
+                <td className="px-4 py-3">{e?.nombreDepartamento ?? '—'}</td>
+                <td className="px-4 py-3">{e?.nombrePuesto ?? '—'}</td> {/* ⟵ nueva */}
+                <td className="px-4 py-3"><StatusPill value={e?.estadoLaboral} /></td>
+                <td className="px-4 py-3">{fmtCurrency(e?.salarioMensual)}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    <Link className="rounded-lg border px-3 py-1 hover:bg-gray-50" to={`/empleados/${e.id}`}>
+                    <Link
+                      className={`rounded-lg border px-3 py-1 hover:bg-gray-50 ${!hasId ? 'pointer-events-none opacity-50' : ''}`}
+                      to={hasId ? `/empleados/${e.id}` : '#'}
+                    >
                       Detalle
                     </Link>
-                    <Link className="rounded-lg border px-3 py-1 hover:bg-gray-50" to={`/empleados/${e.id}/editar`}>
+                    <Link
+                      className={`rounded-lg border px-3 py-1 hover:bg-gray-50 ${!hasId ? 'pointer-events-none opacity-50' : ''}`}
+                      to={hasId ? `/empleados/${e.id}/editar` : '#'}
+                    >
                       Editar
                     </Link>
                     <button
                       type="button"
-                      onClick={() => onToggle(e.id, !activo)}
+                      onClick={() => hasId && onToggle(e.id, !activo)}
+                      disabled={!hasId}
                       className={`rounded-lg border px-3 py-1 ${
                         activo ? 'text-rose-600 hover:bg-rose-50' : 'text-emerald-700 hover:bg-emerald-50'
-                      }`}
+                      } ${!hasId ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {toggleLabel}
                     </button>
