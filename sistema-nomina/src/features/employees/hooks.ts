@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   listEmployees,
   getEmployee,
@@ -8,75 +8,127 @@ import {
   listEmployeeDocs,
   uploadEmployeeDoc,
   deleteEmployeeDoc,
-  type EmployeesListResponse,
-  type EmployeeDocsResponse,
-} from './api';
-import type { EmployeeFilters } from './api';
+  getEmployeeDocSignedUrl,
+  setEmployeeActive,
+} from './api'
+import type {
+  EmployeesListResponse,
+  EmployeeDocsResponse,
+  EmployeeDTO,
+  EmployeeFilters,
+} from './api'
 
+/* ======================= Empleados ======================= */
+
+// LISTA (paginación + filtros)
 export function useEmployees(filters: EmployeeFilters) {
-  return useQuery<EmployeesListResponse>({
-    queryKey: ['employees', filters],
+  return useQuery<EmployeesListResponse, Error>({
+    queryKey: ['employees', filters] as const,
     queryFn: () => listEmployees(filters),
-  });
+    staleTime: 30_000,
+    placeholderData: (prev) => prev,
+  })
 }
 
+// DETALLE
 export function useEmployee(id: number) {
-  return useQuery({
-    queryKey: ['employee', id],
+  return useQuery<EmployeeDTO, Error>({
+    queryKey: ['employee', id] as const,
     queryFn: () => getEmployee(id),
-    enabled: !!id,
-  });
+    enabled: Number.isFinite(id) && id > 0,
+    staleTime: 30_000,
+  })
 }
 
+// CREATE
 export function useCreateEmployee() {
-  const qc = useQueryClient();
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: createEmployee,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['employees'] }),
-  });
-}
-
-export function useUpdateEmployee(id: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: any) => updateEmployee(id, payload),
+    mutationFn: (payload: Partial<EmployeeDTO>) => createEmployee(payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['employees'] });
-      qc.invalidateQueries({ queryKey: ['employee', id] });
+      qc.invalidateQueries({ queryKey: ['employees'] })
     },
-  });
+  })
 }
 
-export function useDeleteEmployee() {
-  const qc = useQueryClient();
+// UPDATE
+export function useUpdateEmployee(id: number) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: deleteEmployee,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['employees'] }),
-  });
+    mutationFn: (payload: Partial<EmployeeDTO>) => updateEmployee(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['employee', id] })
+      qc.invalidateQueries({ queryKey: ['employees'] })
+    },
+  })
 }
 
-// -------- Expediente --------
+// DELETE (si aún lo usas en algún sitio)
+export function useDeleteEmployee() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => deleteEmployee(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['employees'] })
+    },
+  })
+}
+
+/** TOGGLE ACTIVO/SUSPENDIDO (recomendado en lugar de delete) */
+export function useToggleEmployeeActive() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (p: { id: number; activo: boolean }) => setEmployeeActive(p.id, p.activo),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['employees'] })
+      qc.invalidateQueries({ queryKey: ['employee', variables.id] })
+    },
+  })
+}
+
+/* ======================= Expediente (Documentos) ======================= */
+
 export function useEmployeeDocs(empleadoId: number, page = 1, pageSize = 10) {
-  return useQuery<EmployeeDocsResponse>({
-    queryKey: ['employeeDocs', empleadoId, page, pageSize],
+  return useQuery<EmployeeDocsResponse, Error>({
+    queryKey: ['employeeDocs', empleadoId, page, pageSize] as const,
     queryFn: () => listEmployeeDocs(empleadoId, page, pageSize),
-    enabled: !!empleadoId,
-  });
+    enabled: Number.isFinite(empleadoId) && empleadoId > 0,
+    placeholderData: (prev) => prev,
+  })
 }
 
 export function useUploadEmployeeDoc(empleadoId: number) {
-  const qc = useQueryClient();
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: (p: { file: File; tipoDocumentoId: number }) =>
       uploadEmployeeDoc(empleadoId, p.file, p.tipoDocumentoId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['employeeDocs', empleadoId] }),
-  });
+  })
 }
 
 export function useDeleteEmployeeDoc(empleadoId: number) {
-  const qc = useQueryClient();
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: deleteEmployeeDoc,
+    mutationFn: (documentoId: number) => deleteEmployeeDoc(empleadoId, documentoId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['employeeDocs', empleadoId] }),
-  });
+  })
+}
+
+export function useEmployeeDocSignedUrl(
+  empleadoId: number,
+  documentoId: number,
+  minutes?: number,
+  download?: boolean
+) {
+  return useQuery({
+    queryKey: ['employeeDocSas', empleadoId, documentoId, minutes, download] as const,
+    queryFn: () => getEmployeeDocSignedUrl(empleadoId, documentoId, minutes, download),
+    enabled:
+      Number.isFinite(empleadoId) &&
+      empleadoId > 0 &&
+      Number.isFinite(documentoId) &&
+      documentoId > 0,
+    staleTime: 0,
+    gcTime: 0,
+  })
 }

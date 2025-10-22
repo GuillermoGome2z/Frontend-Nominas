@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEmployee, useUpdateEmployee } from './hooks';
 import EmployeeForm from './EmployeeForm';
+import type { EmployeeDTO } from './api'
 
 export default function EmployeeEditPage() {
   const { id } = useParams(); const empId = Number(id);
@@ -15,12 +16,14 @@ export default function EmployeeEditPage() {
     <section className="p-2 sm:p-4">
       <h1 className="mb-4 text-2xl font-bold">Editar empleado</h1>
       <EmployeeForm
-        defaultValues={data}
-        onSubmit={(form)=> upd.mutate(form, {
-          onSuccess: ()=> nav(`/empleados/${empId}`),
-          onError: (e:any)=> alert(e?.message ?? 'Error al actualizar'),
-        })}
-        submitting={upd.isPending}
-      />
+  defaultValues={data}
+  onSubmit={(form: Partial<EmployeeDTO>) =>
+    upd.mutate(form, {
+      onSuccess: () => nav(`/empleados/${empId}`),
+      onError: (e: any) => alert(e?.message ?? 'Error al actualizar'),
+    })
+  }
+  submitting={upd.isPending}
+/>
     </section>);
 }
