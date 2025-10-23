@@ -1,25 +1,18 @@
-import { useForm } from 'react-hook-form'
+﻿import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { api } from '../../lib/http'
 import { useAuthStore } from './useAuthStore'
-import { mapBackendRole } from '../../lib/roles'
+import { mapBackendRole } from '../../types/auth'
+import { authService } from '../../services/authService'
 import { useState } from 'react'
 
 const LoginSchema = z.object({
-  identity: z.string().min(3, 'Ingresa tu usuario o correo').max(100, 'Muy largo'),
+  correo: z.string().email('Ingresa un correo válido').min(3, 'El correo es requerido'),
   password: z.string().min(4, 'La contraseña es requerida'),
 })
 type LoginValues = z.infer<typeof LoginSchema>
-
-// 👇 Ajustado a lo que devuelve tu backend (minúsculas)
-type LoginResponse = {
-  token: string
-  rol: string
-  nombreUsuario?: string
-}
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -31,32 +24,24 @@ export default function LoginPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: { identity: '', password: '' },
+    defaultValues: { correo: '', password: '' },
   })
 
   const mutation = useMutation({
     mutationKey: ['auth', 'login'],
     mutationFn: async (values: LoginValues) => {
-      const payload = {
-        Correo: values.identity,
-        ['Contraseña']: values.password,
-      }
-      const res = await api.post<LoginResponse>('/Auth/login', payload, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      return res.data
+      return authService.login(values.correo, values.password)
     },
-    onSuccess: (data) => {
-      // 👇 Leemos minúsculas y mapeamos el rol
-      const token = data.token
-      const role = mapBackendRole(data.rol)
+    onSuccess: ({ loginData, refreshToken }) => {
+      const token = loginData.token
+      const role = mapBackendRole(loginData.rol)
 
-      if (!token) {
-        setServerError('El backend no devolvió un token válido.')
+      if (!token || !refreshToken) {
+        setServerError('El backend no devolvió tokens válidos.')
         return
       }
 
-      loginStore(token, role)
+      loginStore(token, refreshToken, role)
       navigate(from, { replace: true })
     },
     onError: (err: any) => {
@@ -80,16 +65,16 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Usuario o correo</label>
+            <label className="block text-sm font-medium mb-1">Correo electrónico</label>
             <input
-              type="text"
+              type="email"
               autoComplete="username email"
               className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="tucorreo@empresa.com"
-              {...register('identity')}
+              {...register('correo')}
               disabled={mutation.isPending}
             />
-            {errors.identity && <p className="text-sm text-red-600 mt-1">{errors.identity.message}</p>}
+            {errors.correo && <p className="text-sm text-red-600 mt-1">{errors.correo.message}</p>}
           </div>
 
           <div>
