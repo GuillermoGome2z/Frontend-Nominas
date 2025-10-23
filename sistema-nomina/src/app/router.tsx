@@ -30,7 +30,9 @@ import PositionEditPage from '../features/positions/PositionEditPage'
 
 import PayrollListPage from '../features/payroll/PayrollListPage'
 import ReportsPage from '../features/reports/ReportsPage'
-import FilesPage from '../features/files/FilesPage'
+
+// Expedientes
+import ExpedientesListPage from '../features/expedientes/ExpedientesListPage'
 
 export const router = createBrowserRouter([
   {
@@ -189,7 +191,7 @@ export const router = createBrowserRouter([
         path: 'expedientes',
         element: (
           <RoleGuard roles={['ADMIN', 'RRHH']}>
-            <FilesPage />
+            <ExpedientesListPage />
           </RoleGuard>
         ),
       },

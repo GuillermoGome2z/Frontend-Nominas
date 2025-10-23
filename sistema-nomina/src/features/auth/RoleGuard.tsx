@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuthStore } from './useAuthStore'
-import type { FrontRole } from '../../types/auth'
 
 type Props = { 
   roles: Array<'ADMIN' | 'RRHH' | 'USUARIO' | 'EMP'>

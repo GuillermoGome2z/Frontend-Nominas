@@ -19,16 +19,13 @@ export default function PositionCreatePage() {
         <h1 className="text-2xl font-bold">Nuevo puesto</h1>
       </div>
 
-      {/* Card ÚNICO: borde + sombra + ring (el form ya no tiene borde) */}
-      <div className="rounded-2xl border bg-white/90 p-5 shadow-lg ring-1 ring-black/5">
-        <PositionForm
-          onSubmit={(data)=> create.mutate(data, {
-            onSuccess: ()=> nav('/puestos'),
-            onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear'),
-          })}
-          submitting={create.isPending}
-        />
-      </div>
+      <PositionForm
+        onSubmit={(data)=> create.mutate(data, {
+          onSuccess: ()=> nav('/puestos'),
+          onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear'),
+        })}
+        submitting={create.isPending}
+      />
     </section>
   )
 }

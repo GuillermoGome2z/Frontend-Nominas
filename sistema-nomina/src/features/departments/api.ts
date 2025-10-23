@@ -28,18 +28,31 @@ function mapDept(x: any): DepartmentDTO {
 export async function listDepartments(
   f: DeptFilters = {},
 ): Promise<DeptListResponse> {
-  const params = new URLSearchParams();
-  params.set('page', String(f.page ?? 1));
-  params.set('pageSize', String(f.pageSize ?? 10));
-  if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
+  try {
+    const params = new URLSearchParams();
+    params.set('page', String(f.page ?? 1));
+    params.set('pageSize', String(f.pageSize ?? 10));
+    if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
 
-  const r = await api.get(`/Departamentos?${params.toString()}`);
-  const rawTotal = (r.headers?.['x-total-count'] ??
-    r.headers?.['X-Total-Count'] ??
-    0) as any;
-  const total = Number(rawTotal) || 0;
-  const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
-  return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
+    const r = await api.get(`/Departamentos?${params.toString()}`);
+    const rawTotal = (r.headers?.['x-total-count'] ??
+      r.headers?.['X-Total-Count'] ??
+      0) as any;
+    const total = Number(rawTotal) || 0;
+    const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
+    return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
+  } catch (error: any) {
+    console.error('Error en listDepartments:', error);
+    // Si el backend falla (500), devolver lista vacía
+    if (error?.response?.status === 500) {
+      console.warn('Backend devolvió 500, retornando lista vacía de departamentos');
+      return {
+        data: [],
+        meta: { total: 0, page: f.page ?? 1, pageSize: f.pageSize ?? 10 }
+      };
+    }
+    throw error;
+  }
 }
 
 export async function getDepartment(id: number): Promise<DepartmentDTO> {

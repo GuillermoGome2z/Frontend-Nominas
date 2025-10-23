@@ -20,22 +20,20 @@ export default function DepartmentCreatePage() {
         <h1 className="text-2xl font-bold">Nuevo departamento</h1>
       </div>
 
-      <div className="rounded-2xl border bg-white/90 p-5 shadow-lg ring-1 ring-black/5">
-        <DepartmentForm
-          onSubmit={(data) =>
-            create.mutate(data, {
-              onSuccess: () => nav('/departamentos'),
-              onError: (e: any) =>
-                alert(
-                  e?.response?.data?.mensaje ??
-                    e?.message ??
-                    'Error al crear',
-                ),
-            })
-          }
-          submitting={create.isPending}
-        />
-      </div>
+      <DepartmentForm
+        onSubmit={(data) =>
+          create.mutate(data, {
+            onSuccess: () => nav('/departamentos'),
+            onError: (e: any) =>
+              alert(
+                e?.response?.data?.mensaje ??
+                  e?.message ??
+                  'Error al crear',
+              ),
+          })
+        }
+        submitting={create.isPending}
+      />
     </section>
   );
 }

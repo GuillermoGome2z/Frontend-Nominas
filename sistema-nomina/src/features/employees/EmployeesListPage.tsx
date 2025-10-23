@@ -5,15 +5,25 @@ import EmployeesTable from './components/EmployeesTable'
 import Pagination from './components/Pagination'
 import { useNavigate } from 'react-router-dom'
 import type { EmployeeFilters } from './api'
+import { useToast } from '@/components/ui/Toast'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function EmployeesListPage() {
   const [filters, setFilters] = useState<EmployeeFilters>({ page: 1, pageSize: 10 })
-  const { data, isLoading, isError } = useEmployees(filters)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { data, isLoading, isError, error: queryError } = useEmployees(filters)
   const toggle = useToggleEmployeeActive()
   const navigate = useNavigate()
+  const { success, error } = useToast()
+  const queryClient = useQueryClient()
 
   const total = data?.meta.total ?? 0
   const rows = data?.data ?? []
+
+  // Mostrar error detallado si hay problemas
+  if (isError) {
+    console.error('Error al cargar empleados:', queryError)
+  }
 
   return (
     <section className="mx-auto max-w-7xl p-3 sm:p-6">
@@ -47,15 +57,59 @@ export default function EmployeesListPage() {
 
       {isError && (
         <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700 shadow-sm">
-          Error al cargar empleados.
+          <h3 className="font-semibold mb-2">Error al cargar empleados</h3>
+          <p className="text-sm">
+            {queryError instanceof Error 
+              ? queryError.message 
+              : 'Hubo un problema al conectar con el servidor. Verifica que el backend esté funcionando.'}
+          </p>
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['employees'] })}
+            className="mt-3 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition"
+          >
+            Reintentar
+          </button>
         </div>
       )}
 
       {!isLoading && !isError && (
         <>
           <EmployeesTable
-            rows={rows}
-            onToggle={(id, nextActivo) => toggle.mutate({ id, activo: nextActivo })}
+            employees={rows}
+            isLoading={false}
+            onToggle={(id: number, nextActivo: boolean) => {
+              toggle.mutate(
+                { id, activo: nextActivo },
+                {
+                  onSuccess: async () => {
+                    // Invalidar y refetch inmediato
+                    await queryClient.invalidateQueries({ queryKey: ['employees'] });
+                    await queryClient.refetchQueries({ queryKey: ['employees', filters] });
+                    
+                    const estadoNuevo = nextActivo ? 'activado' : 'suspendido';
+                    success(`Empleado ${estadoNuevo} correctamente.`);
+                    setErrorMessage(null);
+                  },
+                  onError: (e: any) => {
+                    const msg =
+                      e?.response?.data?.mensaje ??
+                      e?.response?.data?.Message ??
+                      e?.message ??
+                      'No se pudo cambiar el estado del empleado.';
+                    
+                    // Si es un error 409, mostrar banner
+                    if (e?.response?.status === 409) {
+                      setErrorMessage(msg);
+                    } else {
+                      error(msg);
+                    }
+                  },
+                }
+              );
+            }}
+            isToggling={toggle.isPending}
+            errorMessage={errorMessage}
+            onClearError={() => setErrorMessage(null)}
           />
 
           <div className="mt-4">
