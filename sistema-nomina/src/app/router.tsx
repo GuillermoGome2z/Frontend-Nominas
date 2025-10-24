@@ -28,9 +28,10 @@ import PositionEditPage from '../features/positions/PositionEditPage'
 
 // import PositionDetailPage from '../features/positions/PositionDetailPage'
 
-import PayrollListPage from '../features/payroll/PayrollListPage'
-import ReportsPage from '../features/reports/ReportsPage'
-import FilesPage from '../features/files/FilesPage'
+import PeriodsListPage from '../features/payroll/pages/PeriodsListPage';
+import PeriodDetailPage from '../features/payroll/pages/PeriodDetailPage';
+import ReportsPage from '../features/reports/ReportsPage';
+import FilesPage from '../features/files/FilesPage';
 
 export const router = createBrowserRouter([
   {
@@ -168,12 +169,36 @@ export const router = createBrowserRouter([
       //   ),
       // },
 
-      // ----- Otros módulos -----
+      // ----- Nómina -----
       {
         path: 'nomina',
         element: (
           <RoleGuard roles={['ADMIN']}>
-            <PayrollListPage />
+            <PeriodsListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nominas',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodsListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nomina/periodos/:id',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodDetailPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nominas/periodos/:id',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodDetailPage />
           </RoleGuard>
         ),
       },
