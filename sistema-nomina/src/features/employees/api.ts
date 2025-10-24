@@ -136,7 +136,7 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Empl
   params.set('page', String(filters.page ?? 1))
   params.set('pageSize', String(filters.pageSize ?? 10))
 
-  const res = await api.get(`/Empleados?${params.toString()}`)
+  const res = await api.get(`/empleados?${params.toString()}`)
 
   // 1) Intento 1: header
   const rawHeaderTotal = (res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count']) as number | string | undefined
@@ -171,7 +171,7 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Empl
 }
 
 export async function getEmployee(id: number): Promise<EmployeeDTO> {
-  const res = await api.get(`/Empleados/${id}`)
+  const res = await api.get(`/empleados/${id}`)
   return mapEmpleado(res.data)
 }
 
@@ -216,7 +216,7 @@ export async function createEmployee(payload: Partial<EmployeeDTO>) {
     PuestoId: pstId,
   }
 
-  const res = await api.post('/Empleados', body)
+  const res = await api.post('/empleados', body)
   // Algunas APIs devuelven { mensaje, empleadoId }, otras devuelven el objeto
   return res.data
 }
@@ -237,34 +237,21 @@ export async function updateEmployee(id: number, payload: Partial<EmployeeDTO>) 
     DepartamentoId: payload.departamentoId ?? 0,
     PuestoId: payload.puestoId,
   }
-  const res = await api.put(`/Empleados/${id}`, body) // 204
+  const res = await api.put(`/empleados/${id}`, body) // 204
   return res.status
 }
 
 export async function deleteEmployee(id: number) {
-  const res = await api.delete(`/Empleados/${id}`) // 204
+  const res = await api.delete(`/empleados/${id}`) // 204
   return res.status
 }
 
-/** Toggle ACTIVO/SUSPENDIDO (reusa PUT completo) */
+/** Toggle ACTIVO/SUSPENDIDO (usa endpoint específico del backend) */
 export async function setEmployeeActive(id: number, activo: boolean) {
-  const current = await getEmployee(id)
   const body = {
-    Id: id,
-    NombreCompleto: current.nombreCompleto,
-    DPI: current.dpi,
-    NIT: current.nit,
-    Correo: current.correo,
-    Telefono: current.telefono,
-    Direccion: current.direccion,
-    FechaNacimiento: toIso(current.fechaNacimiento),
-    FechaContratacion: toIso(current.fechaContratacion),
-    EstadoLaboral: activo ? 'ACTIVO' : 'SUSPENDIDO',
-    SalarioMensual: current.salarioMensual,
-    DepartamentoId: current.departamentoId ?? 0,
-    PuestoId: current.puestoId,
+    estadoLaboral: activo ? 'ACTIVO' : 'SUSPENDIDO'
   }
-  const res = await api.put(`/Empleados/${id}`, body) // 204
+  const res = await api.put(`/empleados/${id}/estado`, body) // 204
   return res.status
 }
 

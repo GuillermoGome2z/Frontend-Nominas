@@ -17,18 +17,29 @@ function normalize(url: string) {
 
 function computeBaseURL() {
   const envUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  
+  console.log("🔧 [API CONFIG]", {
+    VITE_API_URL: envUrl,
+    location: window.location.href,
+    mode: import.meta.env.MODE
+  });
 
   // 1) URL absoluta
   if (envUrl && /^https?:\/\//i.test(envUrl)) {
     const u = normalize(envUrl);
-    return /\/api$/i.test(u) ? u : `${u}/api`;
+    const result = /\/api$/i.test(u) ? u : `${u}/api`;
+    console.log("✅ [API URL] Using absolute:", result);
+    return result;
   }
   // 2) Relativa
   if (envUrl && envUrl.length > 0) {
     const u = normalize(envUrl);
-    return /\/api$/i.test(u) ? u : `${u}/api`;
+    const result = /\/api$/i.test(u) ? u : `${u}/api`;
+    console.log("📍 [API URL] Using relative:", result);
+    return result;
   }
   // 3) Proxy de Vite
+  console.log("⚠️ [API URL] Fallback to proxy: /api");
   return "/api";
 }
 
