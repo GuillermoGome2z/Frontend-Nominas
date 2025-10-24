@@ -32,6 +32,7 @@ import PeriodsListPage from '../features/payroll/pages/PeriodsListPage';
 import PeriodDetailPage from '../features/payroll/pages/PeriodDetailPage';
 import ReportsPage from '../features/reports/ReportsPage';
 import FilesPage from '../features/files/FilesPage';
+import ExpedienteDetailPage from '../features/files/ExpedienteDetailPage';
 
 export const router = createBrowserRouter([
   {
@@ -215,6 +216,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard roles={['ADMIN', 'RRHH']}>
             <FilesPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'expedientes/:id',
+        element: (
+          <RoleGuard roles={['ADMIN', 'RRHH']}>
+            <ExpedienteDetailPage />
           </RoleGuard>
         ),
       },
