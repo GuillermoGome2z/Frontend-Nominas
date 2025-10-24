@@ -3,10 +3,12 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import type { Location } from 'react-router-dom'
 import { useAuthStore } from './useAuthStore'
 import { mapBackendRole } from '../../types/auth'
 import { authService } from '../../services/authService'
 import { useState } from 'react'
+import UserCircleIcon from '../../components/icons/UserCircleIcon'
 
 const LoginSchema = z.object({
   correo: z.string().email('Ingresa un correo válido').min(3, 'El correo es requerido'),
@@ -16,11 +18,13 @@ type LoginValues = z.infer<typeof LoginSchema>
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const location = useLocation() as any
+  type LoginLocationState = { from?: { pathname?: string } }
+  const location = useLocation() as Location & { state?: LoginLocationState }
   const from = location?.state?.from?.pathname ?? '/'
 
   const loginStore = useAuthStore((s) => s.login)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
@@ -44,8 +48,14 @@ export default function LoginPage() {
       loginStore(token, refreshToken, role)
       navigate(from, { replace: true })
     },
-    onError: (err: any) => {
-      const msg = err?.message || err?.detail || err?.title || 'No fue posible iniciar sesión. Verifica tus datos.'
+    onError: (err: unknown) => {
+      let msg = 'No fue posible iniciar sesión. Verifica tus datos.'
+      if (typeof err === 'object' && err !== null) {
+        const e = err as Record<string, unknown>
+        if (typeof e.message === 'string') msg = e.message
+        else if (typeof e.detail === 'string') msg = e.detail
+        else if (typeof e.title === 'string') msg = e.title
+      }
       setServerError(msg)
     },
   })
@@ -56,8 +66,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div
+      className="min-h-screen relative flex items-center justify-center text-gray-900"
+      style={{ backgroundImage: "url('/img/login.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
+      {/* overlay para mejorar legibilidad */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 relative z-10">
+        <div className="flex items-center justify-center mb-3">
+          <div className="h-16 w-16 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            <UserCircleIcon className="h-8 w-8" />
+          </div>
+        </div>
         <h1 className="text-2xl font-bold mb-2 text-center">Iniciar sesión</h1>
         <p className="text-sm text-gray-600 mb-6 text-center">
           Accede con tu cuenta para continuar
@@ -73,22 +94,33 @@ export default function LoginPage() {
               placeholder="tucorreo@empresa.com"
               {...register('correo')}
               disabled={mutation.isPending}
-            />
-            {errors.correo && <p className="text-sm text-red-600 mt-1">{errors.correo.message}</p>}
-          </div>
+              />
+              {errors.correo && <p className="text-sm text-red-600 mt-1">{errors.correo.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Contraseña</label>
-            <input
-              type="password"
-              autoComplete="current-password"
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="••••••••"
-              {...register('password')}
-              disabled={mutation.isPending}
-            />
-            {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>}
-          </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Contraseña</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={mutation.isPending}
+              />
+              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>}
+
+              <div className="mt-2 flex items-center space-x-2">
+                <input
+                  id="show-password"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                />
+                <label htmlFor="show-password" className="text-sm text-gray-600 select-none">Mostrar contraseña</label>
+              </div>
+            </div>
 
           {serverError && (
             <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
