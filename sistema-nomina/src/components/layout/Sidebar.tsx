@@ -38,14 +38,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* Header del sidebar (móvil) */}
         <div className="h-14 px-4 flex items-center justify-between border-b lg:hidden">
-          <span className="font-semibold">RRHH & Nómina</span>
+          <div />
           <button onClick={onClose} aria-label="Cerrar menú" className="p-2 rounded-md hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Marca (desktop) */}
-        <div className="h-14 px-4 hidden lg:flex items-center font-semibold border-b">RRHH & Nómina</div>
+  {/* desktop brand removed as per request */}
 
         {/* Navegación */}
         <nav className="p-3 space-y-1">

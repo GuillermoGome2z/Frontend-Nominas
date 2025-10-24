@@ -16,7 +16,7 @@ export default function Topbar({ onMenu }: { onMenu: () => void }) {
           <Menu className="w-6 h-6" />
         </button>
 
-        <div className="font-semibold text-gray-900">Sistema de Nómina</div>
+  <div className="font-semibold text-gray-900">Sistema de Nómina y Gestión de RR.HH.</div>
 
         <button
           className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
