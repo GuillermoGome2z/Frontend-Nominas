@@ -15,24 +15,32 @@ type Props = {
 export default function EmployeesTable({ rows, onToggle }: Props) {
   if (!rows?.length) {
     return (
-      <div className="mt-6 rounded-2xl border border-dashed p-10 text-center text-gray-500">
-        No hay empleados. Crea el primero con “Nuevo empleado”.
+      <div className="mt-6 rounded-2xl border-2 border-dashed border-slate-300/60 bg-gradient-to-br from-slate-50 to-slate-100/30 p-12 text-center shadow-inner">
+        <div className="mx-auto max-w-md">
+          <div className="text-4xl mb-4">👥</div>
+          <h3 className="text-lg font-semibold text-slate-700 mb-2">No hay empleados registrados</h3>
+          <p className="text-slate-500 text-sm">
+            Comienza agregando empleados a tu sistema de nóminas. 
+            <br />
+            Usa el botón <span className="font-medium text-blue-600">"✨ Nuevo empleado"</span> para empezar.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border bg-white shadow-sm">
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200/50 bg-white shadow-lg ring-1 ring-slate-900/5">
       <table className="min-w-full">
-        <thead className="bg-gray-50 text-left text-sm text-gray-600">
+        <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50 text-left text-sm font-semibold text-slate-700">
           <tr>
-            <th className="px-4 py-3">ID</th>
-            <th className="px-4 py-3">Nombre</th>
-            <th className="px-4 py-3">Departamento</th>
-            <th className="px-4 py-3">Puesto</th> {/* ⟵ nueva */}
-            <th className="px-4 py-3">Estado</th>
-            <th className="px-4 py-3">Salario</th>
-            <th className="px-4 py-3 text-right">Acciones</th>
+            <th className="px-6 py-4 first:rounded-tl-2xl">ID</th>
+            <th className="px-6 py-4">👤 Nombre</th>
+            <th className="px-6 py-4">🏢 Departamento</th>
+            <th className="px-6 py-4">💼 Puesto</th>
+            <th className="px-6 py-4">📊 Estado</th>
+            <th className="px-6 py-4">💰 Salario</th>
+            <th className="px-6 py-4 text-right last:rounded-tr-2xl">⚡ Acciones</th>
           </tr>
         </thead>
         <tbody className="text-sm">
@@ -41,36 +49,54 @@ export default function EmployeesTable({ rows, onToggle }: Props) {
             const activo = (e?.estadoLaboral ?? 'ACTIVO') === 'ACTIVO'
             const toggleLabel = activo ? 'Desactivar' : 'Activar'
             return (
-              <tr key={hasId ? e.id : `row-${idx}`} className={idx % 2 ? 'bg-white' : 'bg-gray-50/30'}>
-                <td className="px-4 py-3">{hasId ? e.id : '—'}</td>
-                <td className="px-4 py-3">{e?.nombreCompleto || '—'}</td>
-                <td className="px-4 py-3">{e?.nombreDepartamento ?? '—'}</td>
-                <td className="px-4 py-3">{e?.nombrePuesto ?? '—'}</td> {/* ⟵ nueva */}
-                <td className="px-4 py-3"><StatusPill value={e?.estadoLaboral} /></td>
-                <td className="px-4 py-3">{fmtCurrency(e?.salarioMensual)}</td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
+              <tr 
+                key={hasId ? e.id : `row-${idx}`} 
+                className={`transition-all hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-indigo-50/30 ${
+                  idx % 2 ? 'bg-white' : 'bg-slate-50/30'
+                }`}
+              >
+                <td className="px-6 py-4 font-mono text-xs font-medium text-slate-600">
+                  {hasId ? `#${e.id}` : '—'}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="font-medium text-slate-900">{e?.nombreCompleto || '—'}</div>
+                  <div className="text-xs text-slate-500">{e?.correo || ''}</div>
+                </td>
+                <td className="px-6 py-4 text-slate-700">{e?.nombreDepartamento ?? '—'}</td>
+                <td className="px-6 py-4 text-slate-700">{e?.nombrePuesto ?? '—'}</td>
+                <td className="px-6 py-4"><StatusPill value={e?.estadoLaboral} /></td>
+                <td className="px-6 py-4">
+                  <span className="font-semibold text-emerald-700">{fmtCurrency(e?.salarioMensual)}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex justify-end gap-3">
                     <Link
-                      className={`rounded-lg border px-3 py-1 hover:bg-gray-50 ${!hasId ? 'pointer-events-none opacity-50' : ''}`}
+                      className={`inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md ${
+                        !hasId ? 'pointer-events-none opacity-50' : ''
+                      }`}
                       to={hasId ? `/empleados/${e.id}` : '#'}
                     >
-                      Detalle
+                      👁️ Detalle
                     </Link>
                     <Link
-                      className={`rounded-lg border px-3 py-1 hover:bg-gray-50 ${!hasId ? 'pointer-events-none opacity-50' : ''}`}
+                      className={`inline-flex items-center rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm transition-all hover:bg-blue-100 hover:shadow-md ${
+                        !hasId ? 'pointer-events-none opacity-50' : ''
+                      }`}
                       to={hasId ? `/empleados/${e.id}/editar` : '#'}
                     >
-                      Editar
+                      ✏️ Editar
                     </Link>
                     <button
                       type="button"
                       onClick={() => hasId && onToggle(e.id, !activo)}
                       disabled={!hasId}
-                      className={`rounded-lg border px-3 py-1 ${
-                        activo ? 'text-rose-600 hover:bg-rose-50' : 'text-emerald-700 hover:bg-emerald-50'
+                      className={`inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium shadow-sm transition-all ${
+                        activo 
+                          ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:shadow-md' 
+                          : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:shadow-md'
                       } ${!hasId ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      {toggleLabel}
+                      {activo ? '🚫' : '✅'} {toggleLabel}
                     </button>
                   </div>
                 </td>

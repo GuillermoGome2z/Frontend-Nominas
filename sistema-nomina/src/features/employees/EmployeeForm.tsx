@@ -18,7 +18,7 @@ const ESTADOS = ['ACTIVO', 'SUSPENDIDO', 'RETIRADO'] as const
 const digitsOnly = (s: string) => s.replace(/\D+/g, '')
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)
 const isDigits = (s: string, len: number) => new RegExp(`^\\d{${len}}$`).test(s)
-const isDigitsRange = (s: string, min: number, max: number) => new RegExp(`^\\d{${min},${max}}$`).test(s)
+
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 const yearsBetween = (a: Date, b: Date) => {
@@ -104,7 +104,7 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
     if (!isEmail(correo)) nextErrors.correo = 'Correo inválido.'
     if (!isDigits(dpiClean, 13)) nextErrors.dpi = 'DPI debe tener exactamente 13 dígitos.'
     if (!isDigits(nitClean, 13)) nextErrors.nit = 'NIT debe tener exactamente 13 dígitos.'
-    if (!isDigitsRange(telClean, 7, 15)) nextErrors.telefono = 'Teléfono debe tener entre 7 y 15 dígitos.'
+    if (!isDigits(telClean, 8)) nextErrors.telefono = 'Teléfono debe tener exactamente 8 dígitos (formato Guatemala).'
 
     // Duplicados entre sí
     if (dpiClean && nitClean && dpiClean === nitClean) nextErrors.nit = 'NIT no puede ser igual al DPI.'
@@ -158,31 +158,53 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
 
   return (
     <form
-      className="grid gap-5 rounded-2xl border bg-white/90 p-5 shadow-lg ring-1 ring-black/5 backdrop-blur transition-all duration-200"
+      className="grid gap-6 rounded-3xl border border-slate-200/60 bg-gradient-to-br from-white to-slate-50/30 p-8 shadow-xl ring-1 ring-slate-900/5 backdrop-blur transition-all duration-300"
       onSubmit={handleSubmit}
       noValidate
     >
       {/* fila 1 */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="group">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre completo</label>
+          <label className="mb-2 block text-sm font-semibold text-slate-700 flex items-center gap-2">
+            👤 Nombre completo
+          </label>
           <input
             value={nombreCompleto}
             onChange={(e)=> { setNombreCompleto(e.target.value); if (errors.nombreCompleto) setErrors(p=>({ ...p, nombreCompleto: '' }))}}
-            className={`w-full rounded-xl border px-3 py-2 shadow-inner transition focus:outline-none focus:ring-2 ${errors.nombreCompleto ? 'border-rose-400 focus:ring-rose-400' : 'focus:ring-indigo-500'}`}
+            className={`w-full rounded-2xl border px-4 py-3 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+              errors.nombreCompleto 
+                ? 'border-rose-300 bg-rose-50/50 focus:ring-rose-400/60' 
+                : 'border-slate-200 bg-white focus:border-blue-300 focus:ring-blue-400/60'
+            }`}
+            placeholder="Ingresa el nombre completo del empleado"
           />
-          {errors.nombreCompleto && <p className="mt-1 text-sm text-rose-600">{errors.nombreCompleto}</p>}
+          {errors.nombreCompleto && (
+            <p className="mt-2 flex items-center gap-2 text-sm font-medium text-rose-700">
+              ❌ {errors.nombreCompleto}
+            </p>
+          )}
         </div>
 
         <div className="group">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Correo</label>
+          <label className="mb-2 block text-sm font-semibold text-slate-700 flex items-center gap-2">
+            📧 Correo electrónico
+          </label>
           <input
             type="email"
             value={correo}
             onChange={(e)=> { setCorreo(e.target.value); if (errors.correo) setErrors(p=>({ ...p, correo: '' }))}}
-            className={`w-full rounded-xl border px-3 py-2 shadow-inner transition focus:outline-none focus:ring-2 ${errors.correo ? 'border-rose-400 focus:ring-rose-400' : 'focus:ring-indigo-500'}`}
+            className={`w-full rounded-2xl border px-4 py-3 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+              errors.correo 
+                ? 'border-rose-300 bg-rose-50/50 focus:ring-rose-400/60' 
+                : 'border-slate-200 bg-white focus:border-blue-300 focus:ring-blue-400/60'
+            }`}
+            placeholder="ejemplo@empresa.com"
           />
-          {errors.correo && <p className="mt-1 text-sm text-rose-600">{errors.correo}</p>}
+          {errors.correo && (
+            <p className="mt-2 flex items-center gap-2 text-sm font-medium text-rose-700">
+              ❌ {errors.correo}
+            </p>
+          )}
         </div>
       </div>
 
@@ -223,9 +245,10 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
           <input
             value={telefono}
             inputMode="tel"
-            maxLength={15}
-            onInput={(e) => { const el = e.currentTarget; el.value = digitsOnly(el.value).slice(0, 15) }}
+            maxLength={8}
+            onInput={(e) => { const el = e.currentTarget; el.value = digitsOnly(el.value).slice(0, 8) }}
             onChange={(e)=> { setTelefono(e.target.value); if (errors.telefono) setErrors(p=>({ ...p, telefono: '' }))}}
+            placeholder="8 dígitos (Guatemala)"
             className={`w-full rounded-xl border px-3 py-2 shadow-inner transition focus:outline-none focus:ring-2 ${errors.telefono ? 'border-rose-400 focus:ring-rose-400' : 'focus:ring-indigo-500'}`}
           />
           {errors.telefono && <p className="mt-1 text-sm text-rose-600">{errors.telefono}</p>}
@@ -337,13 +360,22 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
       </div>
 
       {/* acciones */}
-      <div className="flex flex-wrap gap-2 pt-2">
+      <div className="flex flex-wrap gap-4 pt-6 border-t border-slate-200/50">
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-xl bg-indigo-600 px-5 py-2.5 text-white shadow hover:bg-indigo-700 active:scale-[.98] disabled:opacity-50 transition"
+          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl active:scale-[.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? 'Guardando…' : 'Guardar'}
+          {submitting ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+              Guardando...
+            </>
+          ) : (
+            <>
+              💾 Guardar empleado
+            </>
+          )}
         </button>
         <button
           type="reset"
@@ -353,9 +385,9 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
             setEstadoLaboral('ACTIVO'); setDepartamentoId(undefined); setPuestoId(undefined);
             setSalarioMensual(''); setErrors({})
           }}
-          className="rounded-xl border px-5 py-2.5 text-gray-700 hover:bg-gray-50 active:scale-[.98] transition"
+          className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-md active:scale-[.98]"
         >
-          Limpiar
+          🗑️ Limpiar formulario
         </button>
       </div>
     </form>

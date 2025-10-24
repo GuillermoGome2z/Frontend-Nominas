@@ -14,7 +14,7 @@ export const employeeCreateSchema = z.object({
     .refine(v => /^\d{13}$/.test(v), 'NIT debe tener exactamente 13 dígitos'),
   telefono: z.string()
     .transform(digitsOnly)
-    .refine(v => /^\d{7,15}$/.test(v), 'Teléfono debe tener entre 7 y 15 dígitos'),
+    .refine(v => /^\d{8}$/.test(v), 'Teléfono debe tener exactamente 8 dígitos (formato Guatemala)'),
   direccion: z.string().trim().min(3, 'Dirección muy corta'),
   fechaNacimiento: z.string().refine(v => {
     const d = new Date(v); const now = new Date()
