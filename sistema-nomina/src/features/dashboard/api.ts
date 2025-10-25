@@ -17,7 +17,7 @@ export type DashboardActivity = {
 
 export type DashboardAlert = {
   id: number
-  tipo: 'warning' | 'error' | 'info'
+  tipo: 'warning' | 'error' | 'info' | 'success'
   titulo: string
   descripcion: string
   fecha: string
