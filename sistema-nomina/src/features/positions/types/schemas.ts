@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { Jornada, SALARIO_MIN, SALARIO_MAX } from './Position'
+import { SALARIO_MIN, SALARIO_MAX } from './Position'
 
 // ==================== MENSAJES DE ERROR ====================
 
