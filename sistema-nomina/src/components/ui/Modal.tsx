@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { ReactNode } from 'react'
+
 
 export type ModalType = 'success' | 'error' | 'warning' | 'info'
 

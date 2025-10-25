@@ -5,7 +5,7 @@ import EmployeesTable from './components/EmployeesTable'
 import Pagination from './components/Pagination'
 import { useNavigate } from 'react-router-dom'
 import type { EmployeeFilters } from './api'
-import { useToast } from '@/components/ui/Toast'
+import { useAlert } from '@/components/ui/AlertContext'
 import { useQueryClient } from '@tanstack/react-query'
 
 export default function EmployeesListPage() {
@@ -13,7 +13,7 @@ export default function EmployeesListPage() {
   const { data, isLoading, isError, error: queryError } = useEmployees(filters)
   const toggle = useToggleEmployeeActive()
   const navigate = useNavigate()
-  const { success, error } = useToast()
+  const { showSuccess, showError } = useAlert()
   const queryClient = useQueryClient()
 
   const total = data?.meta.total ?? 0
@@ -86,7 +86,7 @@ export default function EmployeesListPage() {
                     await queryClient.refetchQueries({ queryKey: ['employees', filters] });
                     
                     const estadoNuevo = nextActivo ? 'activado' : 'suspendido';
-                    success(`Empleado ${estadoNuevo} correctamente.`);
+                    showSuccess(`Empleado ${estadoNuevo} correctamente.`);
                   },
                   onError: (e: any) => {
                     const msg =
@@ -95,7 +95,7 @@ export default function EmployeesListPage() {
                       e?.message ??
                       'No se pudo cambiar el estado del empleado.';
                     
-                    error(msg);
+                    showError(msg);
                   },
                 }
               );

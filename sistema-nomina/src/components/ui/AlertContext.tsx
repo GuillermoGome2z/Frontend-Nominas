@@ -56,28 +56,33 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AlertContext.Provider value={{ showAlert, showSuccess, showError, showWarning, showInfo, alerts, clearAlert }}>
       {children}
-      <div className="fixed top-20 right-4 z-50 space-y-3 max-w-sm">
+      <div className="fixed top-20 right-4 z-50 space-y-3 max-w-sm sm:max-w-md">
         {alerts.map((alert) => {
+          // Diseño azul premium uniforme para todas las alertas
           const styles = {
             success: {
-              gradient: 'from-emerald-500 to-teal-500',
+              gradient: 'from-blue-500 via-blue-600 to-indigo-600',
               icon: '✓',
-              ring: 'ring-emerald-200',
+              iconBg: 'bg-blue-100',
+              iconColor: 'text-blue-600',
             },
             error: {
-              gradient: 'from-rose-500 to-pink-500',
+              gradient: 'from-blue-500 via-blue-600 to-indigo-600',
               icon: '✕',
-              ring: 'ring-rose-200',
+              iconBg: 'bg-blue-100',
+              iconColor: 'text-blue-600',
             },
             warning: {
-              gradient: 'from-amber-500 to-orange-500',
+              gradient: 'from-blue-500 via-blue-600 to-indigo-600',
               icon: '⚠',
-              ring: 'ring-amber-200',
+              iconBg: 'bg-blue-100',
+              iconColor: 'text-blue-600',
             },
             info: {
-              gradient: 'from-blue-500 to-indigo-500',
+              gradient: 'from-blue-500 via-blue-600 to-indigo-600',
               icon: 'ℹ',
-              ring: 'ring-blue-200',
+              iconBg: 'bg-blue-100',
+              iconColor: 'text-blue-600',
             },
           }
 
@@ -89,28 +94,35 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
               className={`
                 animate-slide-in-right
                 rounded-2xl bg-gradient-to-r ${style.gradient}
-                p-4 shadow-2xl backdrop-blur-sm
-                ring-4 ${style.ring}
+                p-4 sm:p-5 shadow-2xl
+                ring-4 ring-blue-200/50
                 transform transition-all duration-300
-                hover:scale-105 hover:shadow-3xl
+                hover:scale-[1.02] hover:shadow-3xl
               `}
             >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">{style.icon}</span>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className={`
+                  flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10
+                  rounded-full ${style.iconBg}
+                  flex items-center justify-center
+                  shadow-lg ring-2 ring-white/40
+                `}>
+                  <span className={`text-lg sm:text-xl font-bold ${style.iconColor}`}>
+                    {style.icon}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white leading-relaxed">
+                  <p className="text-sm sm:text-base font-semibold text-white leading-relaxed drop-shadow-sm">
                     {alert.message}
                   </p>
                 </div>
                 <button
                   onClick={() => clearAlert(alert.id)}
-                  className="flex-shrink-0 rounded-lg p-1 text-white/80 hover:text-white hover:bg-white/20 transition-colors"
+                  className="flex-shrink-0 rounded-full p-1.5 text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:rotate-90"
                   aria-label="Cerrar alerta"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>

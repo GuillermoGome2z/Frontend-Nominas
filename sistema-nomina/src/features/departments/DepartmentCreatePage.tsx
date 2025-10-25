@@ -2,10 +2,12 @@
 import DepartmentForm from './DepartmentForm';
 import { useCreateDepartment } from './hooks';
 import { useNavigate } from 'react-router-dom';
+import { useAlert } from '@/components/ui/AlertContext';
 
 export default function DepartmentCreatePage() {
   const nav = useNavigate();
   const create = useCreateDepartment();
+  const { showSuccess, showError } = useAlert();
 
   return (
     <section className="mx-auto max-w-4xl p-3 sm:p-6">
@@ -23,13 +25,14 @@ export default function DepartmentCreatePage() {
       <DepartmentForm
         onSubmit={(data) =>
           create.mutate(data, {
-            onSuccess: () => nav('/departamentos'),
-            onError: (e: any) =>
-              alert(
-                e?.response?.data?.mensaje ??
-                  e?.message ??
-                  'Error al crear',
-              ),
+            onSuccess: () => {
+              showSuccess('✅ Departamento creado exitosamente');
+              nav('/departamentos');
+            },
+            onError: (e: any) => {
+              const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear departamento';
+              showError(msg);
+            },
           })
         }
         submitting={create.isPending}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToggleDepartment } from '../hooks';
 import type { DepartmentDTO } from '../api';
 import StatusPill from '@/components/common/StatusPill';
-import { useToast } from '@/components/ui/Toast';
+import { useAlert } from '@/components/ui/AlertContext';
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
 
@@ -11,7 +11,7 @@ type Props = { rows: DepartmentDTO[] };
 
 export default function DepartmentsTable({ rows }: Props) {
   const toggle = useToggleDepartment();
-  const { success, error } = useToast();
+  const { showSuccess, showError } = useAlert();
   const [conflictError, setConflictError] = useState<{ message: string; solution: string } | null>(null);
 
   if (!rows?.length) {
@@ -35,7 +35,7 @@ export default function DepartmentsTable({ rows }: Props) {
       { id: row.id, activo: next },
       {
         onSuccess: () => {
-          success(`Departamento ${next ? 'activado' : 'desactivado'}.`);
+          showSuccess(`Departamento ${next ? 'activado' : 'desactivado'}.`);
           setConflictError(null);
         },
         onError: (e: any) => {
@@ -53,7 +53,7 @@ export default function DepartmentsTable({ rows }: Props) {
             });
             return;
           }
-          error(
+          showError(
             e?.response?.data?.mensaje ?? 
             e?.response?.data?.Message ??
             'No se pudo cambiar el estado.',

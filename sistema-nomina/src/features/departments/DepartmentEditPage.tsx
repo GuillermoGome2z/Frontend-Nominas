@@ -2,6 +2,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDepartment, useUpdateDepartment } from './hooks';
 import DepartmentForm from './DepartmentForm';
+import { useAlert } from '@/components/ui/AlertContext';
 
 export default function DepartmentEditPage() {
   const { id } = useParams();
@@ -9,6 +10,7 @@ export default function DepartmentEditPage() {
   const { data, isLoading, isError } = useDepartment(deptId);
   const upd = useUpdateDepartment(deptId);
   const nav = useNavigate();
+  const { showSuccess, showError } = useAlert();
 
   if (isLoading) return <div className="p-4">Cargando…</div>;
   if (isError) return <div className="p-4 text-rose-600">Error al cargar.</div>;
@@ -30,13 +32,14 @@ export default function DepartmentEditPage() {
         defaultValues={data}
         onSubmit={(form) =>
           upd.mutate(form, {
-            onSuccess: () => nav('/departamentos'),
-            onError: (e: any) =>
-              alert(
-                e?.response?.data?.mensaje ??
-                  e?.message ??
-                  'Error al actualizar',
-              ),
+            onSuccess: () => {
+              showSuccess('✅ Departamento actualizado exitosamente');
+              nav('/departamentos');
+            },
+            onError: (e: any) => {
+              const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar departamento';
+              showError(msg);
+            },
           })
         }
         submitting={upd.isPending}

@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import type { PositionDTO } from '../api';
 import { useTogglePosition } from '../hooks';
-import { useToast } from '@/components/ui/Toast';
+import { useAlert } from '@/components/ui/AlertContext';
 import { useQuery } from '@tanstack/react-query';
 import { listDepartments, type DepartmentDTO } from '@/features/departments/api';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ type Props = { rows: PositionDTO[] };
 
 export default function PositionsTable({ rows }: Props) {
   const toggle = useTogglePosition();
-  const { success, error } = useToast();
+  const { showSuccess, showError } = useAlert();
   const [conflictError, setConflictError] = useState<{ message: string; solution: string } | null>(null);
 
   const { data: depts } = useQuery({
@@ -60,7 +60,7 @@ export default function PositionsTable({ rows }: Props) {
       { id: row.id, activo: next },
       {
         onSuccess: () => {
-          success(`Puesto ${next ? 'activado' : 'desactivado'}.`);
+          showSuccess(`Puesto ${next ? 'activado' : 'desactivado'}.`);
           setConflictError(null);
         },
         onError: (e: any) => {
@@ -78,7 +78,7 @@ export default function PositionsTable({ rows }: Props) {
             });
             return;
           }
-          error(
+          showError(
             e?.response?.data?.mensaje ??
             e?.response?.data?.Message ??
             'No se pudo cambiar el estado.'

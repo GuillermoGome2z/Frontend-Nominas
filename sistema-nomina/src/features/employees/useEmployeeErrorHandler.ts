@@ -1,8 +1,8 @@
-import { useToast } from '../../components/ui/Toast'
+import { useAlert } from '@/components/ui/AlertContext'
 import { parseValidationError } from './api'
 
 export function useEmployeeErrorHandler() {
-  const { success, warning, info, error: toastError } = useToast()
+  const { showSuccess, showWarning, showInfo, showError } = useAlert()
 
   const handleError = (e: any, context?: string) => {
     const status = e?.response?.status as number | undefined
@@ -10,21 +10,21 @@ export function useEmployeeErrorHandler() {
     // Errores de validación (400/422)
     if (status === 400 || status === 422) {
       const msg = parseValidationError(e)
-      warning(msg ?? 'Hay errores de validación. Revisa los campos.')
+      showWarning(msg ?? 'Hay errores de validación. Revisa los campos.')
       if (context) console.warn(`Validación ${context} (${status}):`, e?.response?.data ?? e)
       return
     }
 
     // Recurso no encontrado (404)
     if (status === 404) {
-      info('Recurso no encontrado.')
+      showInfo('Recurso no encontrado.')
       if (context) console.warn(`404 ${context}:`, e?.response?.data ?? e)
       return
     }
 
     // Archivo muy grande (413)
     if (status === 413) {
-      toastError('Archivo excede el tamaño permitido.')
+      showError('Archivo excede el tamaño permitido.')
       if (context) console.warn(`413 ${context}:`, e?.response?.data ?? e)
       return
     }
@@ -34,15 +34,15 @@ export function useEmployeeErrorHandler() {
     const generic = e?.response?.data?.message ?? e?.message ?? 'Ocurrió un error inesperado.'
     const errorMsg = requestId ? `${generic} (ID: ${String(requestId)})` : generic
     
-    toastError(errorMsg)
+    showError(errorMsg)
     if (context) console.error(`Error ${context}:`, e?.response?.data ?? e)
   }
 
   return {
     handleError,
-    success,
-    warning,
-    info,
-    toastError
+    success: showSuccess,
+    warning: showWarning,
+    info: showInfo,
+    error: showError
   }
 }
