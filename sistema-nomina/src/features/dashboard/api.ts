@@ -5,6 +5,27 @@ export type DepartamentoActivos = {
   activos: number
 }
 
+export type DashboardActivity = {
+  id: number
+  tipo: string
+  descripcion: string
+  fecha: string
+  usuario?: string
+  entidad?: string
+  entidadId?: number
+}
+
+export type DashboardAlert = {
+  id: number
+  tipo: 'warning' | 'error' | 'info'
+  titulo: string
+  descripcion: string
+  fecha: string
+  leido: boolean
+  accion?: string
+  url?: string
+}
+
 export type Kpis = {
   totalEmpleados?: number
   nominaPendienteQ?: number

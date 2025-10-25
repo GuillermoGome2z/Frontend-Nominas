@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: true, // Permite conexiones desde cualquier IP
+    host: '127.0.0.1', // Solo localhost, sin IPs de red
     // NO usar proxy - conectar directamente al backend
     // El frontend hará peticiones directas a http://localhost:5009/api
   },

@@ -34,13 +34,16 @@ export async function listDepartments(
     params.set('pageSize', String(f.pageSize ?? 10));
     if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
 
-  const r = await api.get(`/departamento?${params.toString()}`);
-  const rawTotal = (r.headers?.['x-total-count'] ??
-    r.headers?.['X-Total-Count'] ??
-    0) as any;
-  const total = Number(rawTotal) || 0;
-  const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
-  return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
+    const r = await api.get(`/departamento?${params.toString()}`);
+    const rawTotal = (r.headers?.['x-total-count'] ??
+      r.headers?.['X-Total-Count'] ??
+      0) as any;
+    const total = Number(rawTotal) || 0;
+    const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
+    return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function getDepartment(id: number): Promise<DepartmentDTO> {
