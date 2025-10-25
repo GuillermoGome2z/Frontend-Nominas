@@ -1,8 +1,9 @@
 // ✅ FORMULARIO DE EMPLEADO MEJORADO
 // Campos requeridos según el backend ASP.NET Core
 
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import type { EmployeeDTO } from './api'
+import { checkEmailExists, checkDpiExists, checkNitExists } from './api'
 import { useQuery } from '@tanstack/react-query'
 import { listDepartments, type DepartmentDTO } from '../departments/api'
 import { listPositions, type PositionDTO } from '../positions/api'
@@ -50,8 +51,141 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
   const [puestoId, setPuestoId] = useState<number | undefined>(defaultValues?.puestoId)
   const [salarioMensual, setSalarioMensual] = useState<number | ''>(defaultValues?.salarioMensual ?? '')
 
+  // ----- Validaciones en tiempo real -----
+  const [checkingEmail, setCheckingEmail] = useState(false)
+  const [checkingDpi, setCheckingDpi] = useState(false)
+  const [checkingNit, setCheckingNit] = useState(false)
+  
+  const emailTimerRef = useRef<number | undefined>(undefined)
+  const dpiTimerRef = useRef<number | undefined>(undefined)
+  const nitTimerRef = useRef<number | undefined>(undefined)
+
   // ----- Validaciones (mensajes) -----
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // ----- Validación de correo con debounce -----
+  const validateEmail = useCallback(async (value: string) => {
+    if (!value || !isEmail(value)) return
+    
+    setCheckingEmail(true)
+    try {
+      const exists = await checkEmailExists(value, defaultValues?.id)
+      if (exists) {
+        setErrors(prev => ({
+          ...prev,
+          correo: '⚠️ Este correo ya está registrado en el sistema.'
+        }))
+      } else {
+        setErrors(prev => {
+          const { correo, ...rest } = prev
+          return rest
+        })
+      }
+    } catch (error) {
+      console.error('Error validando correo:', error)
+    } finally {
+      setCheckingEmail(false)
+    }
+  }, [defaultValues?.id])
+
+  // ----- Validación de DPI con debounce -----
+  const validateDpi = useCallback(async (value: string) => {
+    const clean = digitsOnly(value)
+    if (!clean || clean.length !== 13) return
+    
+    setCheckingDpi(true)
+    try {
+      const exists = await checkDpiExists(clean, defaultValues?.id)
+      if (exists) {
+        setErrors(prev => ({
+          ...prev,
+          dpi: '⚠️ Este DPI ya está registrado en el sistema.'
+        }))
+      } else {
+        setErrors(prev => {
+          const { dpi, ...rest } = prev
+          return rest
+        })
+      }
+    } catch (error) {
+      console.error('Error validando DPI:', error)
+    } finally {
+      setCheckingDpi(false)
+    }
+  }, [defaultValues?.id])
+
+  // ----- Validación de NIT con debounce -----
+  const validateNit = useCallback(async (value: string) => {
+    const clean = digitsOnly(value)
+    if (!clean || clean.length !== 13) return
+    
+    setCheckingNit(true)
+    try {
+      const exists = await checkNitExists(clean, defaultValues?.id)
+      if (exists) {
+        setErrors(prev => ({
+          ...prev,
+          nit: '⚠️ Este NIT ya está registrado en el sistema.'
+        }))
+      } else {
+        setErrors(prev => {
+          const { nit, ...rest } = prev
+          return rest
+        })
+      }
+    } catch (error) {
+      console.error('Error validando NIT:', error)
+    } finally {
+      setCheckingNit(false)
+    }
+  }, [defaultValues?.id])
+
+  // ----- Effect para validar correo con debounce -----
+  useEffect(() => {
+    if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
+    
+    if (correo && isEmail(correo)) {
+      emailTimerRef.current = window.setTimeout(() => {
+        validateEmail(correo)
+      }, 800) // Espera 800ms después de que el usuario termina de escribir
+    }
+    
+    return () => {
+      if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
+    }
+  }, [correo, validateEmail])
+
+  // ----- Effect para validar DPI con debounce -----
+  useEffect(() => {
+    if (dpiTimerRef.current) clearTimeout(dpiTimerRef.current)
+    
+    const clean = digitsOnly(dpi)
+    if (clean.length === 13) {
+      dpiTimerRef.current = window.setTimeout(() => {
+        validateDpi(dpi)
+      }, 800)
+    }
+    
+    return () => {
+      if (dpiTimerRef.current) clearTimeout(dpiTimerRef.current)
+    }
+  }, [dpi, validateDpi])
+
+  // ----- Effect para validar NIT con debounce -----
+  useEffect(() => {
+    if (nitTimerRef.current) clearTimeout(nitTimerRef.current)
+    
+    const clean = digitsOnly(nit)
+    if (clean.length === 13) {
+      nitTimerRef.current = window.setTimeout(() => {
+        validateNit(nit)
+      }, 800)
+    }
+    
+    return () => {
+      if (nitTimerRef.current) clearTimeout(nitTimerRef.current)
+    }
+  }, [nit, validateNit])
 
   // ----- Catálogos -----
   const { data: deptsData } = useQuery({
@@ -90,6 +224,26 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const nextErrors: Record<string, string> = {}
+
+    // ========== VALIDACIÓN DE DUPLICADOS (prevenir envío si hay errores de duplicados) ==========
+    if (errors.correo && errors.correo.includes('ya está registrado')) {
+      nextErrors.correo = errors.correo
+    }
+    if (errors.dpi && errors.dpi.includes('ya está registrado')) {
+      nextErrors.dpi = errors.dpi
+    }
+    if (errors.nit && errors.nit.includes('ya está registrado')) {
+      nextErrors.nit = errors.nit
+    }
+
+    // Si hay errores de duplicados, no continuar
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      const firstErrorField = Object.keys(nextErrors)[0]
+      const element = document.querySelector(`[name="${firstErrorField}"]`)
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
 
     // ========== VALIDACIONES OBLIGATORIAS ==========
     if (!nombreCompleto.trim()) {
@@ -266,6 +420,7 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
         <div className="group">
           <label className="mb-2 block text-sm font-semibold text-slate-700 flex items-center gap-2">
             📧 Correo electrónico
+            {checkingEmail && <span className="text-xs text-blue-600 animate-pulse">Verificando...</span>}
           </label>
           <input
             id="correo"
@@ -291,8 +446,9 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
       {/* FILA 2: DPI y NIT */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="dpi" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="dpi" className="mb-1 block text-sm font-medium text-gray-700 flex items-center gap-2">
             DPI <span className="text-rose-600">*</span>
+            {checkingDpi && <span className="text-xs text-blue-600 animate-pulse">Verificando...</span>}
           </label>
           <input
             id="dpi"
@@ -325,8 +481,9 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
         </div>
 
         <div>
-          <label htmlFor="nit" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="nit" className="mb-1 block text-sm font-medium text-gray-700 flex items-center gap-2">
             NIT <span className="text-rose-600">*</span>
+            {checkingNit && <span className="text-xs text-blue-600 animate-pulse">Verificando...</span>}
           </label>
           <input
             id="nit"
