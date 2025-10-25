@@ -2,22 +2,12 @@
 import { Link } from 'react-router-dom';
 import type { PositionDTO } from '../api';
 import { useTogglePosition } from '../hooks';
+import StatusPill from '@/components/common/StatusPill';
 import { useAlert } from '@/components/ui/AlertContext';
 import { useQuery } from '@tanstack/react-query';
 import { listDepartments, type DepartmentDTO } from '@/features/departments/api';
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
-
-function StatusPill({ value }: { value: boolean }) {
-  const cls = value
-    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    : 'bg-gray-50 text-gray-600 border-gray-200';
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs ${cls}`}>
-      {value ? 'Activo' : 'Inactivo'}
-    </span>
-  );
-}
 
 const fmtCurrency = (n?: number) =>
   typeof n === 'number'
@@ -94,7 +84,7 @@ export default function PositionsTable({ rows }: Props) {
       <Modal
         isOpen={!!conflictError}
         onClose={() => setConflictError(null)}
-        type="warning"
+        type="error"
         title="Error de Integridad Referencial"
         message={conflictError?.message ?? ''}
         solution={conflictError?.solution}
