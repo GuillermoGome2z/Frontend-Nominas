@@ -1,10 +1,12 @@
 import PositionForm from './PositionForm'
 import { useCreatePosition } from './hooks'
 import { useNavigate } from 'react-router-dom'
+import { useAlert } from '@/components/ui/AlertContext'
 
 export default function PositionCreatePage() {
   const nav = useNavigate()
   const create = useCreatePosition()
+  const { showSuccess, showError } = useAlert()
 
   return (
     <section className="mx-auto max-w-4xl p-3 sm:p-6">
@@ -21,8 +23,14 @@ export default function PositionCreatePage() {
 
       <PositionForm
         onSubmit={(data)=> create.mutate(data, {
-          onSuccess: ()=> nav('/puestos'),
-          onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear'),
+          onSuccess: ()=> {
+            showSuccess('✅ Puesto creado exitosamente');
+            nav('/puestos');
+          },
+          onError: (e:any)=> {
+            const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear puesto';
+            showError(msg);
+          },
         })}
         submitting={create.isPending}
       />

@@ -36,7 +36,7 @@ export async function listPositions(f: PosFilters = {}): Promise<PosListResponse
   if (typeof f.activo === 'boolean') params.set('activo', String(f.activo))
   if (typeof f.departamentoId === 'number') params.set('departamentoId', String(f.departamentoId))
 
-  const r = await api.get(`/Puesto?${params.toString()}`)
+  const r = await api.get(`/Puestos?${params.toString()}`)
   const rawTotal = (r.headers?.['x-total-count'] ?? r.headers?.['X-Total-Count'] ?? 0) as any
   const total = Number(rawTotal) || 0
   let data = Array.isArray(r.data) ? r.data.map(mapPos) : []
@@ -50,7 +50,7 @@ export async function listPositions(f: PosFilters = {}): Promise<PosListResponse
 }
 
 export async function getPosition(id:number): Promise<PositionDTO> {
-  const r = await api.get(`/Puesto/${id}`)
+  const r = await api.get(`/Puestos/${id}`)
   return mapPos(r.data)
 }
 
@@ -61,7 +61,7 @@ export async function createPosition(p: Partial<PositionDTO>) {
     Activo: p.activo ?? true,
     DepartamentoId: p.departamentoId ?? null,
   }
-  const r = await api.post('/Puesto', body)
+  const r = await api.post('/Puestos', body)
   return r.data
 }
 
@@ -73,12 +73,12 @@ export async function updatePosition(id:number, p: Partial<PositionDTO>) {
     Activo: p.activo ?? true,
     DepartamentoId: p.departamentoId ?? null,
   }
-  const r = await api.put(`/Puesto/${id}`, body)
+  const r = await api.put(`/Puestos/${id}`, body)
   return r.status
 }
 
 export async function togglePositionActive(id:number, activo:boolean) {
-  const endpoint = activo ? `/Puesto/${id}/activar` : `/Puesto/${id}/desactivar`;
+  const endpoint = activo ? `/Puestos/${id}/activar` : `/Puestos/${id}/desactivar`;
   const r = await api.put(endpoint)
   return r.status
 }

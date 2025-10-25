@@ -1,12 +1,14 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { usePosition, useUpdatePosition } from './hooks'
 import PositionForm from './PositionForm'
+import { useAlert } from '@/components/ui/AlertContext'
 
 export default function PositionEditPage() {
   const { id } = useParams(); const posId = Number(id)
   const { data, isLoading, isError } = usePosition(posId)
   const upd = useUpdatePosition(posId)
   const nav = useNavigate()
+  const { showSuccess, showError } = useAlert()
 
   if (isLoading) return <div className="p-4">Cargando…</div>
   if (isError) return <div className="p-4 text-rose-600">Error al cargar.</div>
@@ -27,8 +29,14 @@ export default function PositionEditPage() {
       <PositionForm
         defaultValues={data}
         onSubmit={(form)=> upd.mutate(form, {
-          onSuccess: ()=> nav('/puestos'),
-          onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar'),
+          onSuccess: ()=> {
+            showSuccess('✅ Puesto actualizado exitosamente');
+            nav('/puestos');
+          },
+          onError: (e:any)=> {
+            const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar puesto';
+            showError(msg);
+          },
         })}
         submitting={upd.isPending}
         isEdit={true}
