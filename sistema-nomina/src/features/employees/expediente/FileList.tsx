@@ -44,16 +44,24 @@ export default function FileList({ empleadoId }: FileListProps) {
   const abrirDocumento = async (docId: number, nombre: string) => {
     try {
       setErrorMessage(null)
+      console.log('🔵 Intentando abrir documento:', { empleadoId, docId })
       const sas = await getEmployeeDocSignedUrl(empleadoId, docId, 10, false)
+      console.log('🔵 Respuesta del backend:', sas)
+      
       if (sas?.url) {
+        console.log('✅ Abriendo URL:', sas.url)
         window.open(sas.url, '_blank', 'noopener,noreferrer')
         showSuccess(`Documento "${nombre}" abierto correctamente.`)
       } else {
+        console.error('❌ No hay URL en la respuesta:', sas)
         throw new Error('URL no disponible')
       }
     } catch (e: any) {
-      const msg = e?.response?.data?.mensaje ?? e?.message ?? 'No se pudo abrir el documento.'
-      showError(msg)
+      console.error('❌ Error al abrir documento:', e)
+      console.error('❌ Response data:', e?.response?.data)
+      console.error('❌ Status:', e?.response?.status)
+      const msg = e?.response?.data?.mensaje ?? e?.response?.data?.message ?? e?.message ?? 'No se pudo abrir el documento.'
+      showError(`Error al abrir documento: ${msg}`)
       setErrorMessage(msg)
     }
   }
