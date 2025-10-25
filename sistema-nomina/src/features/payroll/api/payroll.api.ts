@@ -54,7 +54,6 @@ function mapLine(raw: any): PayrollLine {
     puestoNombre: raw.puestoNombre ?? raw.PuestoNombre,
     puesto: raw.puesto ?? raw.Puesto ?? raw.puestoNombre ?? raw.PuestoNombre ?? '',
     departamento: raw.departamento ?? raw.Departamento ?? raw.departamentoNombre ?? raw.DepartamentoNombre ?? '',
-    salarioBase: raw.salarioBase ?? raw.SalarioBase ?? 0,
     totalIngresos: raw.totalIngresos ?? raw.TotalIngresos ?? 0,
     totalDeducciones: raw.totalDeducciones ?? raw.TotalDeducciones ?? 0,
     salarioNeto: raw.salarioNeto ?? raw.SalarioNeto ?? raw.totalNeto ?? raw.TotalNeto ?? 0,

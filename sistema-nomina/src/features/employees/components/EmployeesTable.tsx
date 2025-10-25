@@ -91,7 +91,7 @@ export function EmployeesTable({
                 <td className="px-6 py-4 text-slate-700">{e?.nombrePuesto ?? '—'}</td>
                 <td className="px-6 py-4"><StatusPill value={e?.estadoLaboral} /></td>
                 <td className="px-6 py-4">
-                  <span className="font-semibold text-emerald-700">{formatCurrency(e?.salarioMensual)}</span>
+                  <span className="font-semibold text-emerald-700">{formatCurrency(e?.salarioMensual ?? 0)}</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-end gap-3">
