@@ -56,28 +56,67 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AlertContext.Provider value={{ showAlert, showSuccess, showError, showWarning, showInfo, alerts, clearAlert }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
-        {alerts.map((alert) => (
-          <div
-            key={alert.id}
-            className={`p-4 rounded-lg shadow-lg transition-all ${
-              alert.type === 'success' ? 'bg-green-500 text-white' :
-              alert.type === 'error' ? 'bg-red-500 text-white' :
-              alert.type === 'warning' ? 'bg-yellow-500 text-white' :
-              'bg-blue-500 text-white'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span>{alert.message}</span>
-              <button
-                onClick={() => clearAlert(alert.id)}
-                className="ml-4 text-white hover:text-gray-200"
-              >
-                ✕
-              </button>
+      <div className="fixed top-20 right-4 z-50 space-y-3 max-w-sm">
+        {alerts.map((alert) => {
+          const styles = {
+            success: {
+              gradient: 'from-emerald-500 to-teal-500',
+              icon: '✓',
+              ring: 'ring-emerald-200',
+            },
+            error: {
+              gradient: 'from-rose-500 to-pink-500',
+              icon: '✕',
+              ring: 'ring-rose-200',
+            },
+            warning: {
+              gradient: 'from-amber-500 to-orange-500',
+              icon: '⚠',
+              ring: 'ring-amber-200',
+            },
+            info: {
+              gradient: 'from-blue-500 to-indigo-500',
+              icon: 'ℹ',
+              ring: 'ring-blue-200',
+            },
+          }
+
+          const style = styles[alert.type]
+
+          return (
+            <div
+              key={alert.id}
+              className={`
+                animate-slide-in-right
+                rounded-2xl bg-gradient-to-r ${style.gradient}
+                p-4 shadow-2xl backdrop-blur-sm
+                ring-4 ${style.ring}
+                transform transition-all duration-300
+                hover:scale-105 hover:shadow-3xl
+              `}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">{style.icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white leading-relaxed">
+                    {alert.message}
+                  </p>
+                </div>
+                <button
+                  onClick={() => clearAlert(alert.id)}
+                  className="flex-shrink-0 rounded-lg p-1 text-white/80 hover:text-white hover:bg-white/20 transition-colors"
+                  aria-label="Cerrar alerta"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </AlertContext.Provider>
   )
