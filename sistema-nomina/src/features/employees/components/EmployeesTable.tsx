@@ -39,15 +39,6 @@ export function EmployeesTable({
     );
   }
 
-  const handleToggle = (id: number, estadoActual: string | undefined) => {
-    const esActivo = (estadoActual || '').toUpperCase() === 'ACTIVO';
-    const accion = esActivo ? 'suspender' : 'activar';
-    
-    if (window.confirm(`¿Está seguro que desea ${accion} este empleado?`)) {
-      onToggle(id, !esActivo);
-    }
-  };
-
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200/50 bg-white shadow-lg ring-1 ring-slate-900/5">
       <table className="min-w-full">

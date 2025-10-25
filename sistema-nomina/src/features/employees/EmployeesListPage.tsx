@@ -10,7 +10,6 @@ import { useQueryClient } from '@tanstack/react-query'
 
 export default function EmployeesListPage() {
   const [filters, setFilters] = useState<EmployeeFilters>({ page: 1, pageSize: 10 })
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { data, isLoading, isError, error: queryError } = useEmployees(filters)
   const toggle = useToggleEmployeeActive()
   const navigate = useNavigate()
@@ -88,7 +87,6 @@ export default function EmployeesListPage() {
                     
                     const estadoNuevo = nextActivo ? 'activado' : 'suspendido';
                     success(`Empleado ${estadoNuevo} correctamente.`);
-                    setErrorMessage(null);
                   },
                   onError: (e: any) => {
                     const msg =
@@ -97,12 +95,7 @@ export default function EmployeesListPage() {
                       e?.message ??
                       'No se pudo cambiar el estado del empleado.';
                     
-                    // Si es un error 409, mostrar banner
-                    if (e?.response?.status === 409) {
-                      setErrorMessage(msg);
-                    } else {
-                      error(msg);
-                    }
+                    error(msg);
                   },
                 }
               );
