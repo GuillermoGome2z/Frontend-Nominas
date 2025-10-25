@@ -1,5 +1,17 @@
 export type EstadoLaboral = 'ACTIVO' | 'SUSPENDIDO' | 'RETIRADO';
 
+export type TipoDocumento = 'DPI' | 'CONTRATO' | 'CURRICULUM' | 'CERTIFICADO' | 'OTRO';
+
+export type ExpedienteStatusType = 'completo' | 'incompleto' | 'pendiente';
+
+export interface DocumentoRequerido {
+  id: number;
+  tipo: TipoDocumento;
+  nombre: string;
+  requerido: boolean;
+  subido: boolean;
+}
+
 export interface EmployeeDTO {
   id: number;
   nombreCompleto: string;
