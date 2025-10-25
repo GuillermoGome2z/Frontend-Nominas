@@ -215,7 +215,7 @@ export const router = createBrowserRouter([
         path: 'expedientes',
         element: (
           <RoleGuard roles={['ADMIN', 'RRHH']}>
-            <ExpedientesListPage />
+            <FilesPage />
           </RoleGuard>
         ),
       },

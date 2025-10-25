@@ -103,7 +103,7 @@ export function ReceiptViewer({ isOpen, onClose, line }: ReceiptViewerProps) {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Salario Neto:</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    Q {line.totalNeto.toFixed(2)}
+                    Q {line.salarioNeto.toFixed(2)}
                   </span>
                 </div>
               </div>

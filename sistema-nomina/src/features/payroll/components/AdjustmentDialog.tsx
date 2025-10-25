@@ -56,7 +56,7 @@ export function AdjustmentDialog({ isOpen, onClose, onSubmit, lineaId, empleadoN
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Monto (GTQ) *</label>
               <Controller name="monto" control={control} render={({ field }) => (
-                <Input {...field} type="number" step="0.01" disabled={submitting} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                <Input {...field} type="number" step="0.01" disabled={submitting} onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(parseFloat(e.target.value))} />
               )} />
               {errors.monto && <p className="mt-1 text-sm text-red-600">{errors.monto.message}</p>}
             </div>

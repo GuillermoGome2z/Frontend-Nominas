@@ -4,7 +4,7 @@ import {
   useNominaStats, 
   formatCurrency 
 } from './hooks'
-import PayrollTable from './components/PayrollTable'
+import { PayrollTable } from './components/PayrollTable'
 import PayrollFilters from './components/PayrollFilters'
 import PayrollGenerationModal from './components/PayrollGenerationModal'
 import { StatCard } from '@/components/ui/StatCard'

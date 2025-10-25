@@ -44,27 +44,43 @@ export async function listDepartments(
 }
 
 export async function getDepartment(id: number): Promise<DepartmentDTO> {
-  const r = await api.get(`/departamento/${id}`);
-  return mapDept(r.data);
+  try {
+    const r = await api.get(`/departamento/${id}`);
+    return mapDept(r.data);
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function createDepartment(p: Partial<DepartmentDTO>) {
-  const body = { Nombre: p.nombre, Activo: p.activo ?? true };
-  const r = await api.post('/departamento', body);
-  return r.data;
+  try {
+    const body = { Nombre: p.nombre, Activo: p.activo ?? true };
+    const r = await api.post('/departamento', body);
+    return r.data;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function updateDepartment(id: number, p: Partial<DepartmentDTO>) {
-  const body = { Id: id, Nombre: p.nombre, Activo: p.activo ?? true };
-  const r = await api.put(`/departamento/${id}`, body);
-  return r.status;
+  try {
+    const body = { Id: id, Nombre: p.nombre, Activo: p.activo ?? true };
+    const r = await api.put(`/departamento/${id}`, body);
+    return r.status;
+  } catch (error) {
+    throw error;
+  }
 }
 
 /**
  * Toggle activo: usa endpoints específicos del backend
  */
 export async function toggleDepartmentActive(id: number, activo: boolean) {
-  const endpoint = activo ? `/departamento/${id}/activar` : `/departamento/${id}/desactivar`;
-  const r = await api.put(endpoint);
-  return r.status;
+  try {
+    const endpoint = activo ? `/departamento/${id}/activar` : `/departamento/${id}/desactivar`;
+    const r = await api.put(endpoint);
+    return r.status;
+  } catch (error) {
+    throw error;
+  }
 }
