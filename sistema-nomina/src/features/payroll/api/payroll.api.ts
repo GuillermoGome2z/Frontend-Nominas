@@ -52,11 +52,12 @@ function mapLine(raw: any): PayrollLine {
     empleadoNombre: raw.empleadoNombre ?? raw.EmpleadoNombre,
     empleadoCodigo: raw.empleadoCodigo ?? raw.EmpleadoCodigo,
     puestoNombre: raw.puestoNombre ?? raw.PuestoNombre,
-    departamentoNombre: raw.departamentoNombre ?? raw.DepartamentoNombre,
+    puesto: raw.puesto ?? raw.Puesto ?? raw.puestoNombre ?? raw.PuestoNombre ?? '',
+    departamento: raw.departamento ?? raw.Departamento ?? raw.departamentoNombre ?? raw.DepartamentoNombre ?? '',
     salarioBase: raw.salarioBase ?? raw.SalarioBase ?? 0,
     totalIngresos: raw.totalIngresos ?? raw.TotalIngresos ?? 0,
     totalDeducciones: raw.totalDeducciones ?? raw.TotalDeducciones ?? 0,
-    totalNeto: raw.totalNeto ?? raw.TotalNeto ?? 0,
+    salarioNeto: raw.salarioNeto ?? raw.SalarioNeto ?? raw.totalNeto ?? raw.TotalNeto ?? 0,
     conceptos: Array.isArray(raw.conceptos ?? raw.Conceptos) 
       ? (raw.conceptos ?? raw.Conceptos).map(mapConcept)
       : [],
@@ -69,12 +70,13 @@ function mapLine(raw: any): PayrollLine {
 function mapConcept(raw: any): PayrollConcept {
   return {
     id: raw.id ?? raw.Id,
+    conceptoId: raw.conceptoId ?? raw.ConceptoId ?? raw.id ?? raw.Id,
     codigo: raw.codigo ?? raw.Codigo,
     nombre: raw.nombre ?? raw.Nombre,
     tipo: raw.tipo ?? raw.Tipo,
     monto: raw.monto ?? raw.Monto ?? 0,
-    esAutomatico: raw.esAutomatico ?? raw.EsAutomatico ?? false,
-    descripcion: raw.descripcion ?? raw.Descripcion
+    esCalculado: raw.esCalculado ?? raw.EsCalculado ?? raw.esAutomatico ?? raw.EsAutomatico ?? false,
+    formula: raw.formula ?? raw.Formula
   }
 }
 
@@ -113,14 +115,20 @@ export async function listPeriods(filters: PayrollPeriodFilters = {}): Promise<P
   const rawTotal = response.headers?.['x-total-count'] ?? response.headers?.['X-Total-Count'] ?? 0
   const total = Number(rawTotal) || 0
   const data = Array.isArray(response.data) ? response.data.map(mapPeriod) : []
+  const page = filters.page ?? 1
+  const pageSize = filters.pageSize ?? 10
+  const totalPages = Math.ceil((total || data.length) / pageSize)
 
   return {
     data,
+    total: total || data.length,
+    page,
+    pageSize,
     meta: {
       total: total || data.length,
-      page: filters.page ?? 1,
-      pageSize: filters.pageSize ?? 10,
-      totalPages: Math.ceil((total || data.length) / (filters.pageSize ?? 10))
+      page,
+      pageSize,
+      totalPages
     }
   }
 }
@@ -218,13 +226,18 @@ export async function listPayrollLines(filters: PayrollLineFilters): Promise<Pay
   const rawTotal = response.headers?.['x-total-count'] ?? response.headers?.['X-Total-Count'] ?? 0
   const total = Number(rawTotal) || 0
   const data = Array.isArray(response.data) ? response.data.map(mapLine) : []
+  const page = filters.page ?? 1
+  const pageSize = filters.pageSize ?? 10
 
   return {
     data,
+    total: total || data.length,
+    page,
+    pageSize,
     meta: {
       total: total || data.length,
-      page: filters.page ?? 1,
-      pageSize: filters.pageSize ?? 10
+      page,
+      pageSize
     }
   }
 }

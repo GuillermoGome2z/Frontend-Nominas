@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Loader from '../../../components/ui/Loader';
 import type { EmployeeDTO } from '../types';
 import StatusPill from '../../../components/common/StatusPill';
+import { formatCurrency } from '../../../shared/format';
 
 interface EmployeesTableProps {
   employees: EmployeeDTO[];
@@ -68,7 +69,7 @@ export function EmployeesTable({
           </tr>
         </thead>
         <tbody className="text-sm">
-          {rows.map((e, idx) => {
+          {employees.map((e, idx) => {
             const hasId = Number.isFinite(e?.id) && Number(e.id) > 0
             const activo = (e?.estadoLaboral ?? 'ACTIVO') === 'ACTIVO'
             const toggleLabel = activo ? 'Desactivar' : 'Activar'
@@ -90,7 +91,7 @@ export function EmployeesTable({
                 <td className="px-6 py-4 text-slate-700">{e?.nombrePuesto ?? '—'}</td>
                 <td className="px-6 py-4"><StatusPill value={e?.estadoLaboral} /></td>
                 <td className="px-6 py-4">
-                  <span className="font-semibold text-emerald-700">{fmtCurrency(e?.salarioMensual)}</span>
+                  <span className="font-semibold text-emerald-700">{formatCurrency(e?.salarioMensual)}</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-end gap-3">
