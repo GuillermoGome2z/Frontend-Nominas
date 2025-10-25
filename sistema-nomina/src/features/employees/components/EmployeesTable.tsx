@@ -8,18 +8,12 @@ interface EmployeesTableProps {
   employees: EmployeeDTO[];
   isLoading: boolean;
   onToggle: (id: number, shouldActivate: boolean) => void;
-  isToggling: boolean;
-  errorMessage?: string | null;
-  onClearError?: () => void;
 }
 
 export function EmployeesTable({
   employees,
   isLoading,
   onToggle,
-  isToggling,
-  errorMessage,
-  onClearError,
 }: EmployeesTableProps) {
   if (isLoading) {
     return (
