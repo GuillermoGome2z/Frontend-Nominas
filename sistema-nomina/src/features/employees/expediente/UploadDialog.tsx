@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useUploadEmployeeDoc } from '../hooks'
-import { useToast } from '@/components/ui/Toast'
+import { useAlert } from '@/components/ui/AlertContext'
 import { useQueryClient } from '@tanstack/react-query'
 
 type Props = { empleadoId: number }
@@ -23,7 +23,7 @@ export default function UploadDialog({ empleadoId }: Props) {
   const [dragActive, setDragActive] = useState(false)
   
   const up = useUploadEmployeeDoc(empleadoId)
-  const { success, error } = useToast()
+  const { showSuccess, showError } = useAlert()
   const queryClient = useQueryClient()
 
   const handleFile = (file: File) => {
@@ -39,12 +39,12 @@ export default function UploadDialog({ empleadoId }: Props) {
     ]
 
     if (file.size > maxSize) {
-      error('El archivo es demasiado grande. Máximo 10MB.')
+      showError('El archivo es demasiado grande. Máximo 10MB.')
       return
     }
 
     if (!allowedTypes.includes(file.type)) {
-      error('Tipo de archivo no permitido. Solo PDF, imágenes y documentos Word.')
+      showError('Tipo de archivo no permitido. Solo PDF, imágenes y documentos Word.')
       return
     }
 
@@ -54,7 +54,7 @@ export default function UploadDialog({ empleadoId }: Props) {
         onSuccess: () => {
           // Limpiar input
           if (inputRef.current) inputRef.current.value = ''
-          success('Documento subido correctamente.')
+          showSuccess('✅ Documento subido correctamente.')
           // Invalidar cache para refrescar lista
           queryClient.invalidateQueries({ queryKey: ['employeeDocs', empleadoId] })
         },
@@ -70,7 +70,7 @@ export default function UploadDialog({ empleadoId }: Props) {
             message = 'Ya existe un documento con este nombre.'
           }
           
-          error(message)
+          showError(message)
         },
       }
     )

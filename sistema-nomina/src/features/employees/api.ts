@@ -264,6 +264,7 @@ export interface EmployeeDocDTO {
   nombreOriginal?: string
   rutaArchivo: string
   fechaSubida: string // ISO
+  tamano?: number // bytes
   nombreTipo?: string
   nombreEmpleado?: string
 }
@@ -281,7 +282,8 @@ function mapDoc(x: any): EmployeeDocDTO {
     nombreOriginal: x.nombreOriginal ?? x.NombreOriginal,
     rutaArchivo: x.rutaArchivo ?? x.RutaArchivo,
     fechaSubida: x.fechaSubida ?? x.FechaSubida,
-    nombreTipo: x.nombreTipo ?? x.NombreTipo,
+    tamano: x.tamano ?? x.Tamano ?? x.tamañoBytes ?? x.TamañoBytes ?? x.size ?? x.Size,
+    nombreTipo: x.nombreTipo ?? x.NombreTipo ?? x.tipoDocumento?.nombre ?? x.TipoDocumento?.Nombre,
     nombreEmpleado: x.nombreEmpleado ?? x.NombreEmpleado,
   }
 }

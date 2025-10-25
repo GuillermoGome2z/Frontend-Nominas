@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useEmployeeDocs, useDeleteEmployeeDoc } from '../hooks'
 import type { EmployeeDocDTO } from '../api'
 import { getEmployeeDocSignedUrl } from '../api'
-import { useToast } from '@/components/ui/Toast'
+import { useAlert } from '@/components/ui/AlertContext'
 import { useQueryClient } from '@tanstack/react-query'
 
 interface FileListProps {
@@ -15,7 +15,7 @@ export default function FileList({ empleadoId }: FileListProps) {
   
   const { data, isLoading, isError, error: queryError } = useEmployeeDocs(empleadoId)
   const del = useDeleteEmployeeDoc(empleadoId)
-  const { success, error } = useToast()
+  const { showSuccess, showError } = useAlert()
   const queryClient = useQueryClient()
 
   const rows: EmployeeDocDTO[] = data?.data ?? []
@@ -34,7 +34,12 @@ export default function FileList({ empleadoId }: FileListProps) {
     }
   }
 
-
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes || bytes === 0) return '—'
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
+  }
 
   const abrirDocumento = async (docId: number, nombre: string) => {
     try {
@@ -42,13 +47,13 @@ export default function FileList({ empleadoId }: FileListProps) {
       const sas = await getEmployeeDocSignedUrl(empleadoId, docId, 10, false)
       if (sas?.url) {
         window.open(sas.url, '_blank', 'noopener,noreferrer')
-        success(`Documento "${nombre}" abierto correctamente.`)
+        showSuccess(`Documento "${nombre}" abierto correctamente.`)
       } else {
         throw new Error('URL no disponible')
       }
     } catch (e: any) {
       const msg = e?.response?.data?.mensaje ?? e?.message ?? 'No se pudo abrir el documento.'
-      error(msg)
+      showError(msg)
       setErrorMessage(msg)
     }
   }
@@ -65,13 +70,13 @@ export default function FileList({ empleadoId }: FileListProps) {
     
     del.mutate(doc.id, {
       onSuccess: () => {
-        success(`Documento "${doc.nombreOriginal}" eliminado correctamente.`)
+        showSuccess(`Documento "${doc.nombreOriginal}" eliminado correctamente.`)
         queryClient.invalidateQueries({ queryKey: ['employeeDocs', empleadoId] })
         setDeletingId(null)
       },
       onError: (e: any) => {
         const msg = e?.response?.data?.mensaje ?? e?.message ?? 'No se pudo eliminar el documento.'
-        error(msg)
+        showError(msg)
         setErrorMessage(msg)
         setDeletingId(null)
       },
@@ -199,7 +204,7 @@ export default function FileList({ empleadoId }: FileListProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm text-slate-600">
-                    —
+                    {formatFileSize(doc.tamano)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
