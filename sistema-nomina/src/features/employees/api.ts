@@ -275,12 +275,24 @@ export interface EmployeeDocsResponse {
 }
 
 function mapDoc(x: any): EmployeeDocDTO {
+  // Extraer nombre del archivo desde rutaArchivo si nombreOriginal no existe
+  const rutaArchivo = x.rutaArchivo ?? x.RutaArchivo
+  let nombreOriginal = x.nombreOriginal ?? x.NombreOriginal
+  
+  if (!nombreOriginal && rutaArchivo) {
+    // Extraer el nombre después del GUID: "documentos/1/77873979998b40938b8bfe1094f359b2_Proyecto Final Redes.pdf"
+    const parts = rutaArchivo.split('/')
+    const lastPart = parts[parts.length - 1] // "77873979998b40938b8bfe1094f359b2_Proyecto Final Redes.pdf"
+    const underscoreIndex = lastPart.indexOf('_')
+    nombreOriginal = underscoreIndex > 0 ? lastPart.substring(underscoreIndex + 1) : lastPart
+  }
+  
   return {
     id: x.id ?? x.Id,
     empleadoId: x.empleadoId ?? x.EmpleadoId,
     tipoDocumentoId: x.tipoDocumentoId ?? x.TipoDocumentoId,
-    nombreOriginal: x.nombreOriginal ?? x.NombreOriginal,
-    rutaArchivo: x.rutaArchivo ?? x.RutaArchivo,
+    nombreOriginal,
+    rutaArchivo,
     fechaSubida: x.fechaSubida ?? x.FechaSubida,
     tamano: x.tamano ?? x.Tamano ?? x.tamañoBytes ?? x.TamañoBytes ?? x.size ?? x.Size,
     nombreTipo: x.nombreTipo ?? x.NombreTipo ?? x.tipoDocumento?.nombre ?? x.TipoDocumento?.Nombre,
@@ -296,11 +308,14 @@ export async function listEmployeeDocs(
   pageSize = 10
 ): Promise<EmployeeDocsResponse> {
   const res = await api.get(`/DocumentosEmpleado`, { params: { empleadoId, page, pageSize } })
+  console.log('🔍 Backend Response RAW:', res.data)
   const rawTotal = (res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count'] ?? 0) as number | string
   const total = typeof rawTotal === 'string' ? Number(rawTotal) : Number(rawTotal)
   const body = res.data
   const arr = Array.isArray(body) ? body : (body?.items ?? body?.Items ?? body?.data ?? body?.Data ?? [])
+  console.log('📦 Array to map:', arr)
   const data = Array.isArray(arr) ? arr.map(mapDoc) : []
+  console.log('✅ Mapped data:', data)
   return { data, meta: { total: Number.isFinite(total) ? total : data.length, page, pageSize } }
 }
 
