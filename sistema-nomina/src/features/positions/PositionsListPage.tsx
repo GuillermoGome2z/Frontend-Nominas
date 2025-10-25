@@ -13,10 +13,8 @@ export default function PositionsListPage() {
 
   useEffect(() => {
     if (isError) {
-      showError(
-        'Error al cargar puestos',
-        error?.message || 'No se pudo conectar con el servidor.'
-      )
+      const errorMsg = error?.message || 'No se pudo conectar con el servidor.'
+      showError(errorMsg)
     }
   }, [isError, error, showError])
 

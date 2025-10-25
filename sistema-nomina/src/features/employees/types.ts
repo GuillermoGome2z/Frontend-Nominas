@@ -1,16 +1,16 @@
 export type EstadoLaboral = 'ACTIVO' | 'SUSPENDIDO' | 'RETIRADO';
 
-export enum TipoDocumento {
-  DPI = 1,
-  CV = 2,
-  ANTECEDENTES_PENALES = 3,
-  ANTECEDENTES_POLICIACOS = 4,
-  CONSTANCIA_IGSS = 5,
-  CERTIFICADO_NACIMIENTO = 6,
-  TITULO = 7,
-  CONTRATO_LABORAL = 8,
-  OTRO = 9
-}
+export const TipoDocumento = {
+  DPI: 1,
+  CV: 2,
+  ANTECEDENTES_PENALES: 3,
+  ANTECEDENTES_POLICIACOS: 4,
+  CONSTANCIA_IGSS: 5,
+  CERTIFICADO_NACIMIENTO: 6,
+  TITULO: 7,
+  CONTRATO_LABORAL: 8,
+  OTRO: 9
+} as const;
 
 export type ExpedienteStatusType = 'completo' | 'incompleto' | 'pendiente';
 

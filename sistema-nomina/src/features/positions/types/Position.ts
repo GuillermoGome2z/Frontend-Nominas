@@ -20,6 +20,9 @@ export interface PositionFilters {
   q?: string
   departamentoId?: number
   jornada?: Jornada
+  activo?: boolean
+  salarioMin?: number
+  salarioMax?: number
   page?: number
   pageSize?: number
 }

@@ -107,9 +107,6 @@ export default function EmployeesListPage() {
                 }
               );
             }}
-            isToggling={toggle.isPending}
-            errorMessage={errorMessage}
-            onClearError={() => setErrorMessage(null)}
           />
 
           <div className="mt-4">
