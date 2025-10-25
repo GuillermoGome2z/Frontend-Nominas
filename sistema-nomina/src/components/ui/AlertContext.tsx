@@ -11,6 +11,10 @@ interface Alert {
 
 interface AlertContextType {
   showAlert: (type: AlertType, message: string) => void
+  showSuccess: (message: string) => void
+  showError: (message: string) => void
+  showWarning: (message: string) => void
+  showInfo: (message: string) => void
   alerts: Alert[]
   clearAlert: (id: string) => void
 }
@@ -33,8 +37,24 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     setAlerts((prev) => prev.filter((alert) => alert.id !== id))
   }, [])
 
+  const showSuccess = useCallback((message: string) => {
+    showAlert('success', message)
+  }, [showAlert])
+
+  const showError = useCallback((message: string) => {
+    showAlert('error', message)
+  }, [showAlert])
+
+  const showWarning = useCallback((message: string) => {
+    showAlert('warning', message)
+  }, [showAlert])
+
+  const showInfo = useCallback((message: string) => {
+    showAlert('info', message)
+  }, [showAlert])
+
   return (
-    <AlertContext.Provider value={{ showAlert, alerts, clearAlert }}>
+    <AlertContext.Provider value={{ showAlert, showSuccess, showError, showWarning, showInfo, alerts, clearAlert }}>
       {children}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {alerts.map((alert) => (

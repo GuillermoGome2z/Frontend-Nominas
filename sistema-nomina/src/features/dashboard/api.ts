@@ -7,17 +7,23 @@ export type DepartamentoActivos = {
 
 export type DashboardActivity = {
   id: number
-  type: string
-  description: string
-  timestamp: string
-  user?: string
+  tipo: string
+  descripcion: string
+  fecha: string
+  usuario?: string
+  entidad?: string
+  entidadId?: number
 }
 
 export type DashboardAlert = {
   id: number
-  type: 'warning' | 'error' | 'info'
-  message: string
-  timestamp: string
+  tipo: 'warning' | 'error' | 'info'
+  titulo: string
+  descripcion: string
+  fecha: string
+  leido: boolean
+  accion?: string
+  url?: string
 }
 
 export type Kpis = {
