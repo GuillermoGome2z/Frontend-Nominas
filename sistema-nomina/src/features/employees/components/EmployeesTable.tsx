@@ -1,19 +1,34 @@
-import { Link } from 'react-router-dom'
-import type { EmployeeDTO } from '../api'
-import StatusPill from './StatusPill'
+import { Link } from 'react-router-dom';
+import Loader from '../../../components/ui/Loader';
+import type { EmployeeDTO } from '../types';
+import StatusPill from '../../../components/common/StatusPill';
 
-const fmtCurrency = (n?: number) =>
-  typeof n === 'number'
-    ? new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(n)
-    : '—'
-
-type Props = {
-  rows: EmployeeDTO[]
-  onToggle: (id: number, nextActivo: boolean) => void
+interface EmployeesTableProps {
+  employees: EmployeeDTO[];
+  isLoading: boolean;
+  onToggle: (id: number, shouldActivate: boolean) => void;
+  isToggling: boolean;
+  errorMessage?: string | null;
+  onClearError?: () => void;
 }
 
-export default function EmployeesTable({ rows, onToggle }: Props) {
-  if (!rows?.length) {
+export function EmployeesTable({
+  employees,
+  isLoading,
+  onToggle,
+  isToggling,
+  errorMessage,
+  onClearError,
+}: EmployeesTableProps) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-16">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (employees.length === 0) {
     return (
       <div className="mt-6 rounded-2xl border-2 border-dashed border-slate-300/60 bg-gradient-to-br from-slate-50 to-slate-100/30 p-12 text-center shadow-inner">
         <div className="mx-auto max-w-md">
@@ -26,8 +41,17 @@ export default function EmployeesTable({ rows, onToggle }: Props) {
           </p>
         </div>
       </div>
-    )
+    );
   }
+
+  const handleToggle = (id: number, estadoActual: string | undefined) => {
+    const esActivo = (estadoActual || '').toUpperCase() === 'ACTIVO';
+    const accion = esActivo ? 'suspender' : 'activar';
+    
+    if (window.confirm(`¿Está seguro que desea ${accion} este empleado?`)) {
+      onToggle(id, !esActivo);
+    }
+  };
 
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200/50 bg-white shadow-lg ring-1 ring-slate-900/5">
@@ -106,5 +130,7 @@ export default function EmployeesTable({ rows, onToggle }: Props) {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
+
+export default EmployeesTable;

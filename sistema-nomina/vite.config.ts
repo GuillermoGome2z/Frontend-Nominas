@@ -12,17 +12,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5009',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/health': {
-        target: 'http://localhost:5009',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    host: true, // Permite conexiones desde cualquier IP
+    // NO usar proxy - conectar directamente al backend
+    // El frontend hará peticiones directas a http://localhost:5009/api
   },
 })

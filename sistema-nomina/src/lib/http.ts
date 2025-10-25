@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '../features/auth/useAuthStore'
+import { authService } from '../services/authService'
 
 // baseURL: VITE_API_URL (sin "/" final) o '/api' (proxy dev)
 function computeBaseURL() {
@@ -16,6 +17,24 @@ export const api = axios.create({
   baseURL: computeBaseURL(),
   // timeout: 15000,
 })
+
+// ===================== REFRESH TOKEN LOGIC =====================
+let isRefreshing = false
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void
+  reject: (reason?: any) => void
+}> = []
+
+const processQueue = (error: any = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve()
+    }
+  })
+  failedQueue = []
+}
 
 // ===================== REQUEST INTERCEPTOR =====================
 // - No añade Authorization en /auth/login o /auth/refresh
@@ -36,14 +55,16 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     }
   }
 
-  // ✅ devolver siempre config
   return config
 })
 
 // ===================== RESPONSE INTERCEPTOR =====================
 api.interceptors.response.use(
   (res) => res,
-  (err: AxiosError<any>) => {
+  async (err: AxiosError<any>) => {
+    const originalRequest = err.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+    }
     const status = err.response?.status
     const data = err.response?.data
 
@@ -54,21 +75,74 @@ api.interceptors.response.use(
       (typeof (data as any)?.Message === 'string' && (data as any).Message) ||
       'Ocurrió un error inesperado. Intente nuevamente.'
 
-    // Evitar posible bucle si ya estás en /login
-    if (status === 401) {
-      const { logout } = useAuthStore.getState()
-      logout()
-
-      if (!window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login'
+    // ==================== HANDLE 401 (Unauthorized) ====================
+    if (status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Si ya estamos refrescando, encolar este request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        })
+          .then(() => {
+            // Reintentar con nuevo token
+            return api(originalRequest)
+          })
+          .catch((err) => {
+            return Promise.reject(err)
+          })
       }
-      // No redirigimos aquí, dejamos que los componentes manejen la redirección
 
-      return Promise.reject({ status, message })
+      originalRequest._retry = true
+      isRefreshing = true
+
+      const { refreshToken, updateTokens, logout } = useAuthStore.getState()
+
+      if (!refreshToken) {
+        // No hay refresh token, logout
+        logout()
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login'
+        }
+        processQueue(new Error('No refresh token available'))
+        isRefreshing = false
+        return Promise.reject({ status, message: 'Sesión expirada' })
+      }
+
+      try {
+        // Intentar refresh
+        const refreshData = await authService.refresh(refreshToken)
+        
+        // Actualizar tokens
+        updateTokens(refreshData.token, refreshData.refreshToken)
+
+        // Procesar cola de requests
+        processQueue()
+
+        // Reintentar request original
+        return api(originalRequest)
+      } catch (refreshError) {
+        // Refresh falló, hacer logout
+        processQueue(refreshError)
+        logout()
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login'
+        }
+        return Promise.reject({ status: 401, message: 'Sesión expirada' })
+      } finally {
+        isRefreshing = false
+      }
     }
 
-    if (status === 403 || status === 422) {
+    // ==================== HANDLE OTHER ERRORS ====================
+    if (status === 403) {
+      return Promise.reject({ status, message: 'No tienes permisos para esta acción' })
+    }
+
+    if (status === 422) {
       return Promise.reject({ status, message, errors: (data as any)?.errors })
+    }
+
+    if (status === 413) {
+      return Promise.reject({ status, message: 'El archivo es demasiado grande' })
     }
 
     if (status) {

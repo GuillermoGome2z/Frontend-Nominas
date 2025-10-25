@@ -28,10 +28,11 @@ function mapDept(x: any): DepartmentDTO {
 export async function listDepartments(
   f: DeptFilters = {},
 ): Promise<DeptListResponse> {
-  const params = new URLSearchParams();
-  params.set('page', String(f.page ?? 1));
-  params.set('pageSize', String(f.pageSize ?? 10));
-  if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
+  try {
+    const params = new URLSearchParams();
+    params.set('page', String(f.page ?? 1));
+    params.set('pageSize', String(f.pageSize ?? 10));
+    if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
 
   const r = await api.get(`/departamento?${params.toString()}`);
   const rawTotal = (r.headers?.['x-total-count'] ??

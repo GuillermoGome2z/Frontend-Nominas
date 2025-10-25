@@ -1,15 +1,4 @@
-export type FrontRole = 'ADMIN' | 'RRHH' | 'EMP'
+// Re-export from types/auth for backward compatibility
+export type { FrontRole, BackendRole } from '../types/auth'
+export { ROLES, mapBackendRole } from '../types/auth'
 
-// Mapea roles de backend → frontend
-export function mapBackendRole(rol: string | null | undefined): FrontRole {
-  switch (rol) {
-    case 'Admin':
-      return 'ADMIN'
-    case 'RRHH':
-      return 'RRHH'
-    case 'Empleado':
-    case 'Usuario':
-    default:
-      return 'EMP'
-  }
-}

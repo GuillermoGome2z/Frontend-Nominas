@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import { useToast } from '../../components/ui/Toast'
+import SRLiveRegion from '../../components/ui/SRLiveRegion'
+import AuthDebug from '../debug/AuthDebug'
 
 /** Puente: escucha eventos globales y dispara tu sistema de toasts */
 function ToastBridge() {
@@ -54,6 +56,8 @@ export default function AppLayout() {
       </div>
 
       <ToastBridge />
+      <SRLiveRegion />
+      <AuthDebug />
     </div>
   )
 }

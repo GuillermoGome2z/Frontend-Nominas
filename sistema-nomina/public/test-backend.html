@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend Connection</title>
+</head>
+<body>
+    <h1>Test de Conectividad del Backend</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testBackend() {
+            const results = document.getElementById('result');
+            
+            // Test 1: Verificar si el backend responde
+            try {
+                const response = await fetch('http://localhost:5009/api/health');
+                results.innerHTML += `<p>✅ Backend Health Check: ${response.status}</p>`;
+            } catch (e) {
+                results.innerHTML += `<p>❌ Backend no disponible: ${e.message}</p>`;
+            }
+            
+            // Test 2: Verificar endpoint de reportes
+            try {
+                const response = await fetch('http://localhost:5009/api/reportes/general');
+                results.innerHTML += `<p>✅ Endpoint reportes: ${response.status}</p>`;
+            } catch (e) {
+                results.innerHTML += `<p>❌ Endpoint reportes no disponible: ${e.message}</p>`;
+            }
+            
+            // Test 3: Verificar CORS
+            results.innerHTML += `<p>🔍 Frontend corriendo en: ${window.location.origin}</p>`;
+            results.innerHTML += `<p>🔍 Esperando backend en: http://localhost:5009</p>`;
+        }
+        
+        testBackend();
+    </script>
+</body>
+</html>

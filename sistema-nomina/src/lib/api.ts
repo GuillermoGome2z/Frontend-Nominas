@@ -24,14 +24,15 @@ function computeBaseURL() {
     mode: import.meta.env.MODE
   });
 
-  // 1) URL absoluta
+  // 1) Si hay URL definida en .env, usarla directamente
   if (envUrl && /^https?:\/\//i.test(envUrl)) {
     const u = normalize(envUrl);
     const result = /\/api$/i.test(u) ? u : `${u}/api`;
     console.log("✅ [API URL] Using absolute:", result);
     return result;
   }
-  // 2) Relativa
+  
+  // 2) URL relativa desde .env
   if (envUrl && envUrl.length > 0) {
     const u = normalize(envUrl);
     const result = /\/api$/i.test(u) ? u : `${u}/api`;

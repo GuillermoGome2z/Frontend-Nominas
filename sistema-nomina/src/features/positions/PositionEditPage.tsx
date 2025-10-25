@@ -24,16 +24,15 @@ export default function PositionEditPage() {
         <h1 className="text-2xl font-bold">Editar puesto</h1>
       </div>
 
-      <div className="rounded-2xl border bg-white/90 p-5 shadow-lg ring-1 ring-black/5">
-        <PositionForm
-          defaultValues={data}
-          onSubmit={(form)=> upd.mutate(form, {
-            onSuccess: ()=> nav('/puestos'),
-            onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar'),
-          })}
-          submitting={upd.isPending}
-        />
-      </div>
+      <PositionForm
+        defaultValues={data}
+        onSubmit={(form)=> upd.mutate(form, {
+          onSuccess: ()=> nav('/puestos'),
+          onError: (e:any)=> alert(e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar'),
+        })}
+        submitting={upd.isPending}
+        isEdit={true}
+      />
     </section>
   )
 }
