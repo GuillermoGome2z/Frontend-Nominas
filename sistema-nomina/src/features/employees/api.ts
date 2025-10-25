@@ -255,6 +255,73 @@ export async function setEmployeeActive(id: number, activo: boolean) {
   return res.status
 }
 
+/* ======================= Validación de Duplicados ======================= */
+
+/**
+ * Verifica si un correo ya está registrado en el sistema.
+ * @param correo - Email a verificar
+ * @param excludeId - ID del empleado actual (para edición, excluir el propio registro)
+ * @returns true si el correo ya existe, false si está disponible
+ */
+export async function checkEmailExists(correo: string, excludeId?: number): Promise<boolean> {
+  try {
+    const params = new URLSearchParams()
+    params.set('correo', correo.trim().toLowerCase())
+    if (excludeId) params.set('excludeId', String(excludeId))
+    
+    const res = await api.get(`/empleados/validar/correo?${params.toString()}`)
+    // Backend puede responder: { exists: true/false } o { disponible: true/false }
+    return res.data?.exists === true || res.data?.disponible === false
+  } catch (error: any) {
+    // Si el endpoint no existe (404), asumimos que NO hay duplicados
+    if (error?.response?.status === 404) return false
+    console.error('Error al verificar correo:', error)
+    return false
+  }
+}
+
+/**
+ * Verifica si un DPI ya está registrado en el sistema.
+ * @param dpi - DPI a verificar (13 dígitos)
+ * @param excludeId - ID del empleado actual (para edición)
+ * @returns true si el DPI ya existe, false si está disponible
+ */
+export async function checkDpiExists(dpi: string, excludeId?: number): Promise<boolean> {
+  try {
+    const params = new URLSearchParams()
+    params.set('dpi', dpi.replace(/\D/g, ''))
+    if (excludeId) params.set('excludeId', String(excludeId))
+    
+    const res = await api.get(`/empleados/validar/dpi?${params.toString()}`)
+    return res.data?.exists === true || res.data?.disponible === false
+  } catch (error: any) {
+    if (error?.response?.status === 404) return false
+    console.error('Error al verificar DPI:', error)
+    return false
+  }
+}
+
+/**
+ * Verifica si un NIT ya está registrado en el sistema.
+ * @param nit - NIT a verificar (13 dígitos)
+ * @param excludeId - ID del empleado actual (para edición)
+ * @returns true si el NIT ya existe, false si está disponible
+ */
+export async function checkNitExists(nit: string, excludeId?: number): Promise<boolean> {
+  try {
+    const params = new URLSearchParams()
+    params.set('nit', nit.replace(/\D/g, ''))
+    if (excludeId) params.set('excludeId', String(excludeId))
+    
+    const res = await api.get(`/empleados/validar/nit?${params.toString()}`)
+    return res.data?.exists === true || res.data?.disponible === false
+  } catch (error: any) {
+    if (error?.response?.status === 404) return false
+    console.error('Error al verificar NIT:', error)
+    return false
+  }
+}
+
 /* ======================= Tipos (Expediente) ======================= */
 
 export interface EmployeeDocDTO {
