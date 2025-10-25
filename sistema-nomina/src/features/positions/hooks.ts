@@ -50,22 +50,13 @@ export function useUpdatePosition(id:number) {
 
 export function useTogglePosition() {
   const qc = useQueryClient()
-  const { success, info, error } = useToast()
   return useMutation({
     mutationFn: (p:{id:number; activo:boolean}) => togglePositionActive(p.id, p.activo),
     onSuccess: (_d, v)=> {
+      // Invalidar queries para refrescar la tabla
       qc.invalidateQueries({queryKey:['position', v.id]})
       qc.invalidateQueries({queryKey:['positions']})
-      success(`Puesto ${v.activo ? 'activado' : 'desactivado'}.`)
     },
-    onError: (e:any)=> {
-      const status = e?.response?.status
-      if (status === 409) {
-        const d = e?.response?.data
-        const msg = d?.message ?? 'No se puede desactivar: hay empleados activos en este puesto.'
-        info(msg); return
-      }
-      error('No se pudo cambiar el estado.')
-    },
+    // El manejo de errores y éxito se hace en el componente
   })
 }

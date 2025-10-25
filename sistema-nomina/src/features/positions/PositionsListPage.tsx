@@ -11,6 +11,9 @@ export default function PositionsListPage() {
   const nav = useNavigate()
   const { showError } = useAlert()
 
+  console.log('🔵 Puestos - Filters:', filters)
+  console.log('🔵 Puestos - Data:', data)
+
   useEffect(() => {
     if (isError) {
       const errorMsg = error?.message || 'No se pudo conectar con el servidor.'
@@ -20,6 +23,8 @@ export default function PositionsListPage() {
 
   const total = data?.meta.total ?? 0
   const rows = data?.data ?? []
+
+  console.log('🔵 Puestos - Total:', total, 'Rows:', rows.length)
 
   return (
     <section className="mx-auto max-w-7xl px-3 sm:px-4 md:px-6 py-3 sm:py-6" style={{ paddingTop: 'calc(var(--topbar-height, 64px) + 16px)' }}>
@@ -52,8 +57,13 @@ export default function PositionsListPage() {
           <PositionsTable rows={rows} />
           <div className="mt-3 sm:mt-4">
             <Pagination
-              page={filters.page} pageSize={filters.pageSize} total={total}
-              onPageChange={(p)=> setFilters((prev:any)=> ({ ...prev, page: p }))}
+              page={filters.page} 
+              pageSize={filters.pageSize} 
+              total={total}
+              onPageChange={(p)=> {
+                console.log('📄 Cambiando a página:', p)
+                setFilters((prev:any)=> ({ ...prev, page: p }))
+              }}
             />
           </div>
         </>

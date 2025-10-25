@@ -340,9 +340,29 @@ export async function getEmployeeDocSignedUrl(
   minutes?: number,
   download?: boolean
 ): Promise<{ url: string; path: string; expiresAt: string }> {
-  const res = await api.get(`/DocumentosEmpleado/${empleadoId}/${documentoId}/download`, {
-    params: { minutes, download },
-  })
-  const d = res.data || {}
-  return { url: d.url ?? d.Url, path: d.path ?? d.Path, expiresAt: d.expiresAt ?? d.ExpiresAt }
+  const endpoint = `/DocumentosEmpleado/${empleadoId}/${documentoId}/download`
+  console.log('🌐 Llamando al backend:', endpoint, { minutes, download })
+  
+  try {
+    const res = await api.get(endpoint, {
+      params: { minutes, download },
+    })
+    console.log('✅ Respuesta del backend (status):', res.status)
+    console.log('✅ Respuesta del backend (data):', res.data)
+    
+    const d = res.data || {}
+    const result = { 
+      url: d.url ?? d.Url, 
+      path: d.path ?? d.Path, 
+      expiresAt: d.expiresAt ?? d.ExpiresAt 
+    }
+    console.log('✅ Datos procesados:', result)
+    return result
+  } catch (error: any) {
+    console.error('❌ Error en getEmployeeDocSignedUrl:', error)
+    console.error('❌ Status:', error?.response?.status)
+    console.error('❌ Data:', error?.response?.data)
+    console.error('❌ Config URL:', error?.config?.url)
+    throw error
+  }
 }

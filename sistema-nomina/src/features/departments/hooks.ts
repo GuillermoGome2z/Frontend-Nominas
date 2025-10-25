@@ -57,27 +57,14 @@ export function useUpdateDepartment(id: number) {
 
 export function useToggleDepartment() {
   const qc = useQueryClient();
-  const { success, info, error } = useToast();
   return useMutation({
     mutationFn: (p: { id: number; activo: boolean }) =>
       toggleDepartmentActive(p.id, p.activo),
     onSuccess: (_d, v) => {
+      // Invalidar queries para refrescar la tabla
       qc.invalidateQueries({ queryKey: ['department', v.id] });
       qc.invalidateQueries({ queryKey: ['departments'] });
-      success(`Departamento ${v.activo ? 'activado' : 'desactivado'}.`);
     },
-    onError: (e: any) => {
-      const status = e?.response?.status;
-      if (status === 409) {
-        // Elección C: no se puede desactivar si hay puestos o empleados activos
-        const d = e?.response?.data;
-        const msg =
-          d?.message ??
-          'No se puede desactivar: hay puestos y/o empleados activos en este departamento.';
-        info(msg);
-        return;
-      }
-      error('No se pudo cambiar el estado.');
-    },
+    // El manejo de errores y éxito se hace en el componente
   });
 }
