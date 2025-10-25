@@ -34,7 +34,7 @@ export async function listDepartments(
     params.set('pageSize', String(f.pageSize ?? 10));
     if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
 
-    const r = await api.get(`/Departamento?${params.toString()}`);
+    const r = await api.get(`/departamentos?${params.toString()}`);
     const rawTotal = (r.headers?.['x-total-count'] ??
       r.headers?.['X-Total-Count'] ??
       0) as any;
@@ -48,7 +48,7 @@ export async function listDepartments(
 
 export async function getDepartment(id: number): Promise<DepartmentDTO> {
   try {
-    const r = await api.get(`/Departamento/${id}`);
+    const r = await api.get(`/departamentos/${id}`);
     return mapDept(r.data);
   } catch (error) {
     throw error;
@@ -58,7 +58,7 @@ export async function getDepartment(id: number): Promise<DepartmentDTO> {
 export async function createDepartment(p: Partial<DepartmentDTO>) {
   try {
     const body = { Nombre: p.nombre, Activo: p.activo ?? true };
-    const r = await api.post('/Departamento', body);
+    const r = await api.post('/departamentos', body);
     return r.data;
   } catch (error) {
     throw error;
@@ -68,7 +68,7 @@ export async function createDepartment(p: Partial<DepartmentDTO>) {
 export async function updateDepartment(id: number, p: Partial<DepartmentDTO>) {
   try {
     const body = { Id: id, Nombre: p.nombre, Activo: p.activo ?? true };
-    const r = await api.put(`/Departamento/${id}`, body);
+    const r = await api.put(`/departamentos/${id}`, body);
     return r.status;
   } catch (error) {
     throw error;
@@ -80,7 +80,7 @@ export async function updateDepartment(id: number, p: Partial<DepartmentDTO>) {
  */
 export async function toggleDepartmentActive(id: number, activo: boolean) {
   try {
-    const endpoint = activo ? `/Departamento/${id}/activar` : `/Departamento/${id}/desactivar`;
+    const endpoint = activo ? `/departamentos/${id}/activar` : `/departamentos/${id}/desactivar`;
     const r = await api.put(endpoint);
     return r.status;
   } catch (error) {
