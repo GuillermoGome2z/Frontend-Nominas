@@ -1,202 +1,176 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useReportes, useExportExcel, useExportPDF } from './hooks'
-import type { ReportFilter } from './api'
-import ReportFilters from './components/ReportFilters'
-import ResumenCard from './components/ResumenCard'
-import EmpleadosTable from './components/EmpleadosTable'
-import DepartamentosTable from './components/DepartamentosTable'
 import { useToast } from '@/components/ui/Toast'
+import {
+  downloadExpedientesPDF,
+  downloadInformacionAcademicaPDF,
+  downloadAjustesPDF,
+  downloadAuditoriaPDF,
+  downloadEmpleadosCSV,
+  downloadEmpleadosExcel,
+} from './api/reports.api'
+import { FileText, Download, Users, FileSpreadsheet, ClipboardList, Shield } from 'lucide-react'
 
 export default function ReportsPage() {
-  const navigate = useNavigate()
   const { success, error } = useToast()
-  const [filters, setFilters] = useState<ReportFilter>({})
-  
-  const { data: reportData, isLoading, isError, error: queryError } = useReportes(filters)
-  const exportExcel = useExportExcel()
-  const exportPDF = useExportPDF()
+  const [loading, setLoading] = useState<string | null>(null)
 
-  const handleFilter = (newFilters: ReportFilter) => {
-    console.log('📊 Filtros aplicados:', newFilters)
-    setFilters(newFilters)
-  }
-
-  const handleExportExcel = async () => {
+  const handleDownload = async (type: string, downloadFn: () => Promise<void>) => {
+    setLoading(type)
     try {
-      const blob = await exportExcel.mutateAsync(filters)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `reporte-empleados-${new Date().toISOString().split('T')[0]}.xlsx`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      success('Reporte exportado a Excel correctamente')
-    } catch (err: any) {
-      console.error('Error al exportar Excel:', err)
-      error(err?.response?.data?.mensaje ?? 'Error al generar el archivo Excel')
+      await downloadFn()
+      success('Reporte descargado correctamente')
+    } catch (err) {
+      error('Error al descargar el reporte')
+      console.error('Error descargando reporte:', err)
+    } finally {
+      setLoading(null)
     }
   }
 
-  const handleExportPDF = async () => {
-    try {
-      const blob = await exportPDF.mutateAsync(filters)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `reporte-empleados-${new Date().toISOString().split('T')[0]}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      success('Reporte exportado a PDF correctamente')
-    } catch (err: any) {
-      console.error('Error al exportar PDF:', err)
-      error(err?.response?.data?.mensaje ?? 'Error al generar el archivo PDF')
+  const reportCards = [
+    {
+      id: 'expedientes',
+      title: 'Expedientes de Empleados',
+      description: 'Estado de completitud de expedientes por empleado',
+      icon: ClipboardList,
+      color: 'indigo',
+      actions: [
+        { label: 'Descargar PDF', format: 'pdf', fn: downloadExpedientesPDF },
+      ],
+    },
+    {
+      id: 'empleados',
+      title: 'Listado de Empleados',
+      description: 'Exportar listado completo de empleados',
+      icon: Users,
+      color: 'blue',
+      actions: [
+        { label: 'Descargar CSV', format: 'csv', fn: downloadEmpleadosCSV },
+        { label: 'Descargar Excel', format: 'xlsx', fn: downloadEmpleadosExcel },
+      ],
+    },
+    {
+      id: 'academica',
+      title: 'Información Académica',
+      description: 'Reporte de formación académica de empleados',
+      icon: FileText,
+      color: 'green',
+      actions: [
+        { label: 'Descargar PDF', format: 'pdf', fn: downloadInformacionAcademicaPDF },
+      ],
+    },
+    {
+      id: 'ajustes',
+      title: 'Ajustes Manuales',
+      description: 'Historial de ajustes realizados en nóminas',
+      icon: FileSpreadsheet,
+      color: 'yellow',
+      actions: [
+        { label: 'Descargar PDF', format: 'pdf', fn: () => downloadAjustesPDF() },
+      ],
+    },
+    {
+      id: 'auditoria',
+      title: 'Logs de Auditoría',
+      description: 'Registro de actividad del sistema',
+      icon: Shield,
+      color: 'red',
+      actions: [
+        { label: 'Descargar PDF', format: 'pdf', fn: () => downloadAuditoriaPDF() },
+      ],
+    },
+  ]
+
+  const getColorClasses = (color: string) => {
+    const colors: Record<string, { bg: string; icon: string; button: string }> = {
+      indigo: { bg: 'bg-indigo-50', icon: 'text-indigo-600', button: 'bg-indigo-600 hover:bg-indigo-700' },
+      blue: { bg: 'bg-blue-50', icon: 'text-blue-600', button: 'bg-blue-600 hover:bg-blue-700' },
+      green: { bg: 'bg-green-50', icon: 'text-green-600', button: 'bg-green-600 hover:bg-green-700' },
+      yellow: { bg: 'bg-yellow-50', icon: 'text-yellow-600', button: 'bg-yellow-600 hover:bg-yellow-700' },
+      red: { bg: 'bg-red-50', icon: 'text-red-600', button: 'bg-red-600 hover:bg-red-700' },
     }
+    return colors[color] || colors.indigo
   }
 
   return (
-    <section className="mx-auto max-w-7xl p-3 sm:p-6">
-      {/* Header */}
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
-          aria-label="Regresar"
-        >
-          ← Regresar
-        </button>
-        <h1 className="ml-1 text-2xl font-bold">Reportes de Recursos Humanos</h1>
-      </div>
-
-      {/* Filtros */}
+    <div style={{ paddingTop: 'calc(var(--topbar-height, 64px) + 32px)' }} className="mx-auto max-w-7xl p-3 sm:p-6">
       <div className="mb-6">
-        <ReportFilters
-          onFilter={handleFilter}
-          onExportExcel={handleExportExcel}
-          onExportPDF={handleExportPDF}
-          isExporting={exportExcel.isPending || exportPDF.isPending}
-        />
+        <h1 className="text-3xl font-bold mb-2">Reportes</h1>
+        <p className="text-gray-600">Genera y descarga reportes de RRHH, Nómina y Auditoría</p>
       </div>
 
-      {/* Estados de carga y error */}
-      {isLoading && (
-        <div className="mt-6 animate-pulse rounded-2xl border bg-white p-6 text-gray-500 shadow-sm">
-          <div className="flex items-center gap-3">
-            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            Generando reporte...
-          </div>
-        </div>
-      )}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {reportCards.map((card) => {
+          const colors = getColorClasses(card.color)
+          const Icon = card.icon
 
-      {isError && (
-        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700 shadow-sm">
-          <h3 className="font-semibold mb-2">Error al generar el reporte</h3>
-          <p className="text-sm mb-3">
-            {queryError instanceof Error 
-              ? queryError.message 
-              : 'Hubo un problema al conectar con el servidor.'}
-          </p>
-          
-          {/* Diagnóstico del error */}
-          <div className="text-xs bg-rose-100 border border-rose-200 rounded p-3 mb-3">
-            <strong>🔍 Diagnóstico:</strong>
-            <div className="mt-2 space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span>Frontend: http://localhost:5175/ ✅</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span>Backend: http://localhost:5009/ ✅</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span>
-                  {queryError?.name === 'CORSError' 
-                    ? 'CORS no configurado ❌' 
-                    : 'Endpoint de reportes no implementado ❌'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-xs bg-blue-100 border border-blue-200 rounded p-3 mb-3">
-            <strong>📝 Para el desarrollador del backend:</strong>
-            <div className="mt-1">
-              {queryError?.name === 'CORSError' ? (
-                <div>
-                  <p>1. Agregar configuración CORS en Program.cs:</p>
-                  <code className="block bg-blue-50 p-2 mt-1 rounded text-xs">
-                    builder.Services.AddCors();<br/>
-                    app.UseCors(policy =&gt; policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-                  </code>
+          return (
+            <div
+              key={card.id}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`${colors.bg} p-3 rounded-lg`}>
+                  <Icon className={`w-6 h-6 ${colors.icon}`} />
                 </div>
-              ) : (
-                <div>
-                  <p>Implementar endpoints de reportes:</p>
-                  <ul className="list-disc list-inside mt-1 ml-2">
-                    <li><code>GET /api/reportes/general</code></li>
-                    <li><code>GET /api/reportes/excel</code></li>
-                    <li><code>GET /api/reportes/pdf</code></li>
-                  </ul>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">{card.title}</h3>
+                  <p className="text-sm text-gray-600">{card.description}</p>
                 </div>
-              )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {card.actions.map((action, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleDownload(`${card.id}-${action.format}`, action.fn)}
+                    disabled={loading === `${card.id}-${action.format}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${colors.button}`}
+                  >
+                    {loading === `${card.id}-${action.format}` ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Descargando...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        {action.label}
+                      </>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Sección de Nóminas - Requiere seleccionar nómina específica */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Reportes de Nómina</h2>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <FileSpreadsheet className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2 text-blue-900">Reportes de Nómina Específica</h3>
+              <p className="text-sm text-blue-700 mb-3">
+                Para descargar reportes de una nómina específica (PDF, Excel, recibos individuales),
+                ve al módulo de <strong>Nómina</strong> y selecciona el periodo deseado.
+              </p>
+              <a
+                href="/nomina"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Ir a Nóminas →
+              </a>
             </div>
           </div>
-          
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition"
-          >
-            Reintentar
-          </button>
         </div>
-      )}
-
-      {/* Contenido del reporte */}
-      {!isLoading && !isError && reportData && (
-        <div className="space-y-6">
-          {/* Resumen general */}
-          <ResumenCard resumen={reportData.resumen} />
-
-          {/* Tabla de empleados */}
-          <EmpleadosTable empleados={reportData.empleados} />
-
-          {/* Tabla de departamentos */}
-          <DepartamentosTable departamentos={reportData.departamentos} />
-
-          {/* Información adicional */}
-          <div className="bg-slate-50 rounded-xl border p-4 text-sm text-slate-600">
-            <div className="flex items-center gap-2 mb-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">Información del reporte</span>
-            </div>
-            <p>
-              <strong>Fecha de generación:</strong> {' '}
-              {new Date(reportData.fechaGeneracion).toLocaleString('es-GT')}
-            </p>
-            <p className="mt-1">
-              <strong>Filtros aplicados:</strong> {' '}
-              {Object.entries(filters).filter(([_, value]) => value).length > 0
-                ? Object.entries(filters)
-                    .filter(([_, value]) => value)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ')
-                : 'Ninguno (mostrando todos los datos)'}
-            </p>
-          </div>
-        </div>
-      )}
-    </section>
+      </div>
+    </div>
   )
 }
+

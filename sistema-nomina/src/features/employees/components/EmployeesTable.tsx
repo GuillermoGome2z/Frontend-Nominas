@@ -30,8 +30,16 @@ export function EmployeesTable({
 
   if (employees.length === 0) {
     return (
-      <div className="text-center py-16">
-        <p className="text-lg text-slate-500">No se encontraron empleados</p>
+      <div className="mt-6 rounded-2xl border-2 border-dashed border-slate-300/60 bg-gradient-to-br from-slate-50 to-slate-100/30 p-12 text-center shadow-inner">
+        <div className="mx-auto max-w-md">
+          <div className="text-4xl mb-4">👥</div>
+          <h3 className="text-lg font-semibold text-slate-700 mb-2">No hay empleados registrados</h3>
+          <p className="text-slate-500 text-sm">
+            Comienza agregando empleados a tu sistema de nóminas. 
+            <br />
+            Usa el botón <span className="font-medium text-blue-600">"✨ Nuevo empleado"</span> para empezar.
+          </p>
+        </div>
       </div>
     );
   }
@@ -46,140 +54,81 @@ export function EmployeesTable({
   };
 
   return (
-    <div className="space-y-4">
-      {errorMessage && (
-        <div 
-          className="animate-slide-down rounded-xl border-2 border-rose-300 bg-gradient-to-r from-rose-50 to-rose-100 shadow-md px-6 py-4"
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-rose-200 flex items-center justify-center ring-2 ring-rose-300">
-              <svg className="w-5 h-5 text-rose-700" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-rose-900 mb-1">
-                Error de integridad
-              </h3>
-              <p className="text-sm text-rose-800 leading-relaxed">
-                {errorMessage}
-              </p>
-            </div>
-            <button
-              onClick={onClearError}
-              className="flex-shrink-0 text-rose-500 hover:text-rose-700 hover:bg-rose-200 rounded-lg p-2 transition-all duration-200"
-              aria-label="Cerrar mensaje"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                ID
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Nombre Completo
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Puesto
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Departamento
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Estado Laboral
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-slate-100">
-            {employees.map((emp) => {
-              const esActivo = (emp.estadoLaboral || '').toUpperCase() === 'ACTIVO';
-              
-              return (
-                <tr 
-                  key={emp.id}
-                  className="hover:bg-slate-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-slate-900">
-                      {emp.id}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-slate-900">
-                      {emp.nombreCompleto}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-slate-600">
-                      {emp.nombrePuesto || '—'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-slate-600">
-                      {emp.nombreDepartamento || '—'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusPill value={emp.estadoLaboral} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-3">
-                      <Link
-                        to={`/empleados/${emp.id}`}
-                        className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Detalle
-                      </Link>
-                      <Link
-                        to={`/empleados/${emp.id}/editar`}
-                        className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-all duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Editar
-                      </Link>
-                      <button
-                        onClick={() => handleToggle(emp.id, emp.estadoLaboral)}
-                        disabled={isToggling}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          esActivo
-                            ? 'border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                            : 'border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-                        }`}
-                      >
-                        {isToggling ? (
-                          'Procesando...'
-                        ) : esActivo ? (
-                          'Suspender'
-                        ) : (
-                          'Activar'
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200/50 bg-white shadow-lg ring-1 ring-slate-900/5">
+      <table className="min-w-full">
+        <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50 text-left text-sm font-semibold text-slate-700">
+          <tr>
+            <th className="px-6 py-4 first:rounded-tl-2xl">ID</th>
+            <th className="px-6 py-4">👤 Nombre</th>
+            <th className="px-6 py-4">🏢 Departamento</th>
+            <th className="px-6 py-4">💼 Puesto</th>
+            <th className="px-6 py-4">📊 Estado</th>
+            <th className="px-6 py-4">💰 Salario</th>
+            <th className="px-6 py-4 text-right last:rounded-tr-2xl">⚡ Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="text-sm">
+          {rows.map((e, idx) => {
+            const hasId = Number.isFinite(e?.id) && Number(e.id) > 0
+            const activo = (e?.estadoLaboral ?? 'ACTIVO') === 'ACTIVO'
+            const toggleLabel = activo ? 'Desactivar' : 'Activar'
+            return (
+              <tr 
+                key={hasId ? e.id : `row-${idx}`} 
+                className={`transition-all hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-indigo-50/30 ${
+                  idx % 2 ? 'bg-white' : 'bg-slate-50/30'
+                }`}
+              >
+                <td className="px-6 py-4 font-mono text-xs font-medium text-slate-600">
+                  {hasId ? `#${e.id}` : '—'}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="font-medium text-slate-900">{e?.nombreCompleto || '—'}</div>
+                  <div className="text-xs text-slate-500">{e?.correo || ''}</div>
+                </td>
+                <td className="px-6 py-4 text-slate-700">{e?.nombreDepartamento ?? '—'}</td>
+                <td className="px-6 py-4 text-slate-700">{e?.nombrePuesto ?? '—'}</td>
+                <td className="px-6 py-4"><StatusPill value={e?.estadoLaboral} /></td>
+                <td className="px-6 py-4">
+                  <span className="font-semibold text-emerald-700">{fmtCurrency(e?.salarioMensual)}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex justify-end gap-3">
+                    <Link
+                      className={`inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md ${
+                        !hasId ? 'pointer-events-none opacity-50' : ''
+                      }`}
+                      to={hasId ? `/empleados/${e.id}` : '#'}
+                    >
+                      👁️ Detalle
+                    </Link>
+                    <Link
+                      className={`inline-flex items-center rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm transition-all hover:bg-blue-100 hover:shadow-md ${
+                        !hasId ? 'pointer-events-none opacity-50' : ''
+                      }`}
+                      to={hasId ? `/empleados/${e.id}/editar` : '#'}
+                    >
+                      ✏️ Editar
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => hasId && onToggle(e.id, !activo)}
+                      disabled={!hasId}
+                      className={`inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium shadow-sm transition-all ${
+                        activo 
+                          ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:shadow-md' 
+                          : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:shadow-md'
+                      } ${!hasId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {activo ? '🚫' : '✅'} {toggleLabel}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

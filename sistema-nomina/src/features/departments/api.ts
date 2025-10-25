@@ -34,51 +34,37 @@ export async function listDepartments(
     params.set('pageSize', String(f.pageSize ?? 10));
     if (typeof f.activo === 'boolean') params.set('activo', String(f.activo));
 
-    const r = await api.get(`/Departamentos?${params.toString()}`);
-    const rawTotal = (r.headers?.['x-total-count'] ??
-      r.headers?.['X-Total-Count'] ??
-      0) as any;
-    const total = Number(rawTotal) || 0;
-    const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
-    return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
-  } catch (error: any) {
-    console.error('Error en listDepartments:', error);
-    // Si el backend falla (500), devolver lista vacía
-    if (error?.response?.status === 500) {
-      console.warn('Backend devolvió 500, retornando lista vacía de departamentos');
-      return {
-        data: [],
-        meta: { total: 0, page: f.page ?? 1, pageSize: f.pageSize ?? 10 }
-      };
-    }
-    throw error;
-  }
+  const r = await api.get(`/departamento?${params.toString()}`);
+  const rawTotal = (r.headers?.['x-total-count'] ??
+    r.headers?.['X-Total-Count'] ??
+    0) as any;
+  const total = Number(rawTotal) || 0;
+  const data = Array.isArray(r.data) ? r.data.map(mapDept) : [];
+  return { data, meta: { total, page: f.page ?? 1, pageSize: f.pageSize ?? 10 } };
 }
 
 export async function getDepartment(id: number): Promise<DepartmentDTO> {
-  const r = await api.get(`/Departamentos/${id}`);
+  const r = await api.get(`/departamento/${id}`);
   return mapDept(r.data);
 }
 
 export async function createDepartment(p: Partial<DepartmentDTO>) {
   const body = { Nombre: p.nombre, Activo: p.activo ?? true };
-  const r = await api.post('/Departamentos', body);
+  const r = await api.post('/departamento', body);
   return r.data;
 }
 
 export async function updateDepartment(id: number, p: Partial<DepartmentDTO>) {
   const body = { Id: id, Nombre: p.nombre, Activo: p.activo ?? true };
-  const r = await api.put(`/Departamentos/${id}`, body);
+  const r = await api.put(`/departamento/${id}`, body);
   return r.status;
 }
 
 /**
- * Toggle activo: si el backend responde 409 => “en uso”.
- * (Empleados y/o puestos activos en el departamento.)
+ * Toggle activo: usa endpoints específicos del backend
  */
 export async function toggleDepartmentActive(id: number, activo: boolean) {
-  const current = await getDepartment(id);
-  const body = { Id: id, Nombre: current.nombre, Activo: activo };
-  const r = await api.put(`/Departamentos/${id}`, body);
+  const endpoint = activo ? `/departamento/${id}/activar` : `/departamento/${id}/desactivar`;
+  const r = await api.put(endpoint);
   return r.status;
 }

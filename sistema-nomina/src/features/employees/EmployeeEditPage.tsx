@@ -2,14 +2,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEmployee, useUpdateEmployee } from './hooks'
 import EmployeeForm from './EmployeeForm'
 import type { EmployeeDTO } from './api'
-import { useToast } from '../../components/ui/Toast'
-import { parseValidationError } from './api'
+import { useEmployeeErrorHandler } from './useEmployeeErrorHandler'
 
 export default function EmployeeEditPage() {
   const { id } = useParams()
   const empId = Number(id)
   const nav = useNavigate()
-  const { success, warning, info, error: toastError } = useToast()
+  const { success, handleError } = useEmployeeErrorHandler()
 
   if (!id || !Number.isFinite(empId) || empId <= 0) {
     return <div className="p-8 text-center text-rose-600">ID de empleado inválido.</div>
@@ -43,27 +42,10 @@ export default function EmployeeEditPage() {
           onSubmit={(form: Partial<EmployeeDTO>) =>
             upd.mutate(form, {
               onSuccess: () => {
-                success('Empleado actualizado')
+                success('✅ Empleado actualizado con éxito')
                 nav(`/empleados/${empId}`)
               },
-              onError: (e: any) => {
-                const status = e?.response?.status as number | undefined
-                if (status === 400 || status === 422) {
-                  const msg = parseValidationError?.(e)
-                  warning(msg ?? 'Hay errores de validación. Revisa los campos.')
-                  return
-                }
-                if (status === 404) { info('Recurso no encontrado.'); return }
-                if (status === 413) { toastError('Archivo excede el tamaño permitido.'); return }
-
-                const requestId =
-                  e?.response?.headers?.['x-request-id'] ??
-                  e?.response?.data?.requestId
-                const generic =
-                  e?.response?.data?.message ??
-                  e?.message ?? 'Ocurrió un error inesperado.'
-                toastError(requestId ? `${generic} (ID: ${String(requestId)})` : generic)
-              },
+              onError: (e: any) => handleError(e, 'PUT /Empleados'),
             })
           }
         />

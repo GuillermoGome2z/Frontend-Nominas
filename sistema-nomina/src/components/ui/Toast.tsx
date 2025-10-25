@@ -59,14 +59,30 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             role="alert"
-            className={`rounded-xl border px-4 py-2 text-sm shadow bg-white transition-all
-              ${t.tone === 'success' ? 'border-emerald-200 text-emerald-700' :
-                t.tone === 'error' ? 'border-rose-200 text-rose-700' :
-                t.tone === 'warning' ? 'border-amber-200 text-amber-700' :
-                'border-sky-200 text-sky-700'}
+            className={`rounded-2xl px-6 py-4 text-sm font-medium shadow-2xl backdrop-blur-sm transition-all duration-300 transform hover:scale-105 animate-in slide-in-from-right-5 fade-in-0
+              ${t.tone === 'success' 
+                ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200/50 text-emerald-800 shadow-emerald-500/20' 
+                : t.tone === 'error' 
+                ? 'bg-gradient-to-r from-rose-50 to-red-50 border-2 border-rose-200/50 text-rose-800 shadow-rose-500/20' 
+                : t.tone === 'warning' 
+                ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200/50 text-amber-800 shadow-amber-500/20' 
+                : 'bg-gradient-to-r from-sky-50 to-blue-50 border-2 border-sky-200/50 text-sky-800 shadow-sky-500/20'}
             `}
           >
-            {t.message}
+            <div className="flex items-center gap-3">
+              <span className={`text-lg
+                ${t.tone === 'success' ? '🎉' : 
+                  t.tone === 'error' ? '⚠️' : 
+                  t.tone === 'warning' ? '⚠️' : 
+                  'ℹ️'}
+              `}>
+                {t.tone === 'success' ? '🎉' : 
+                 t.tone === 'error' ? '❌' : 
+                 t.tone === 'warning' ? '⚠️' : 
+                 'ℹ️'}
+              </span>
+              <span className="flex-1 leading-relaxed">{t.message}</span>
+            </div>
           </div>
         ))}
       </div>

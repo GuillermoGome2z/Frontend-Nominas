@@ -1,13 +1,12 @@
 import EmployeeForm from './EmployeeForm'
 import { useCreateEmployee } from './hooks'
 import { useNavigate } from 'react-router-dom'
-import { parseValidationError } from './api'
-import { useToast } from '../../components/ui/Toast'
+import { useEmployeeErrorHandler } from './useEmployeeErrorHandler'
 
 export default function EmployeeCreatePage() {
   const navigate = useNavigate()
   const create = useCreateEmployee()
-  const { success, warning, info, error: toastError } = useToast()
+  const { success, handleError } = useEmployeeErrorHandler()
 
   return (
     <section className="mx-auto max-w-5xl p-3 sm:p-6">
@@ -30,41 +29,10 @@ export default function EmployeeCreatePage() {
           onSubmit={(data) =>
             create.mutate(data, {
               onSuccess: () => {
-                success('Empleado creado con éxito')
+                success('✅ Empleado creado con éxito')
                 navigate('/empleados')
               },
-              onError: (e: any) => {
-                const status = e?.response?.status as number | undefined
-
-                if (status === 400 || status === 422) {
-                  const msg = parseValidationError(e)
-                  warning(msg ?? 'Hay errores de validación. Revisa los campos.')
-                  console.warn('Validación (400/422):', e?.response?.data ?? e)
-                  return
-                }
-
-                if (status === 404) {
-                  info('Recurso no encontrado.')
-                  console.warn('404:', e?.response?.data ?? e)
-                  return
-                }
-
-                if (status === 413) {
-                  toastError('Archivo excede el tamaño permitido.')
-                  console.warn('413:', e?.response?.data ?? e)
-                  return
-                }
-
-                const requestId =
-                  e?.response?.headers?.['x-request-id'] ??
-                  e?.response?.data?.requestId
-                const generic =
-                  e?.response?.data?.message ??
-                  e?.message ??
-                  'Ocurrió un error inesperado.'
-                toastError(requestId ? `${generic} (ID: ${String(requestId)})` : generic)
-                console.error('POST /Empleados error:', e?.response?.data ?? e)
-              },
+              onError: (e: any) => handleError(e, 'POST /Empleados'),
             })
           }
         />

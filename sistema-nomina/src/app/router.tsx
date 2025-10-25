@@ -28,11 +28,11 @@ import PositionEditPage from '../features/positions/PositionEditPage'
 
 // import PositionDetailPage from '../features/positions/PositionDetailPage'
 
-import PayrollListPage from '../features/payroll/PayrollListPage'
-import ReportsPage from '../features/reports/ReportsPage'
-
-// Expedientes
-import ExpedientesListPage from '../features/expedientes/ExpedientesListPage'
+import PeriodsListPage from '../features/payroll/pages/PeriodsListPage';
+import PeriodDetailPage from '../features/payroll/pages/PeriodDetailPage';
+import ReportsPage from '../features/reports/ReportsPage';
+import FilesPage from '../features/files/FilesPage';
+import ExpedienteDetailPage from '../features/files/ExpedienteDetailPage';
 
 export const router = createBrowserRouter([
   {
@@ -170,12 +170,36 @@ export const router = createBrowserRouter([
       //   ),
       // },
 
-      // ----- Otros módulos -----
+      // ----- Nómina -----
       {
         path: 'nomina',
         element: (
           <RoleGuard roles={['ADMIN']}>
-            <PayrollListPage />
+            <PeriodsListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nominas',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodsListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nomina/periodos/:id',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodDetailPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'nominas/periodos/:id',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PeriodDetailPage />
           </RoleGuard>
         ),
       },
@@ -192,6 +216,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard roles={['ADMIN', 'RRHH']}>
             <ExpedientesListPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'expedientes/:id',
+        element: (
+          <RoleGuard roles={['ADMIN', 'RRHH']}>
+            <ExpedienteDetailPage />
           </RoleGuard>
         ),
       },

@@ -17,25 +17,31 @@ function normalize(url: string) {
 
 function computeBaseURL() {
   const envUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  
+  console.log("🔧 [API CONFIG]", {
+    VITE_API_URL: envUrl,
+    location: window.location.href,
+    mode: import.meta.env.MODE
+  });
 
   // 1) Si hay URL definida en .env, usarla directamente
   if (envUrl && /^https?:\/\//i.test(envUrl)) {
     const u = normalize(envUrl);
-    console.log('🌐 API Base URL (from .env):', u);
-    return u;
+    const result = /\/api$/i.test(u) ? u : `${u}/api`;
+    console.log("✅ [API URL] Using absolute:", result);
+    return result;
   }
   
   // 2) URL relativa desde .env
   if (envUrl && envUrl.length > 0) {
     const u = normalize(envUrl);
-    console.log('🌐 API Base URL (relative):', u);
-    return u;
+    const result = /\/api$/i.test(u) ? u : `${u}/api`;
+    console.log("📍 [API URL] Using relative:", result);
+    return result;
   }
-  
-  // 3) Fallback directo al backend (sin proxy)
-  const fallbackUrl = 'http://localhost:5009/api';
-  console.log('🌐 API Base URL (fallback):', fallbackUrl);
-  return fallbackUrl;
+  // 3) Proxy de Vite
+  console.log("⚠️ [API URL] Fallback to proxy: /api");
+  return "/api";
 }
 
 export const api = axios.create({ baseURL: computeBaseURL() });
