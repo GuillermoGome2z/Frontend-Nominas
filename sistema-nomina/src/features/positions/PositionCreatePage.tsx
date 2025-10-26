@@ -28,7 +28,30 @@ export default function PositionCreatePage() {
             nav('/puestos');
           },
           onError: (e:any)=> {
-            const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al crear puesto';
+            const status = e?.response?.status;
+            
+            // Manejo de error 409 - Puesto duplicado
+            if (status === 409) {
+              const detail = e?.response?.data?.detail ?? e?.response?.data?.Detail;
+              const title = e?.response?.data?.title ?? e?.response?.data?.Title;
+              const errorMsg = detail || title || 'Ya existe un puesto con ese nombre.';
+              showError(`⚠️ Puesto duplicado: ${errorMsg}`);
+              return;
+            }
+            
+            // Manejo de error 422 - Validación
+            if (status === 422) {
+              const detail = e?.response?.data?.detail ?? e?.response?.data?.Detail;
+              const errorMsg = detail || 'Verifica los datos ingresados.';
+              showError(`❌ Error de validación: ${errorMsg}`);
+              return;
+            }
+            
+            // Error genérico
+            const msg = e?.response?.data?.mensaje ?? 
+                       e?.response?.data?.detail ?? 
+                       e?.message ?? 
+                       'Error al crear puesto';
             showError(msg);
           },
         })}

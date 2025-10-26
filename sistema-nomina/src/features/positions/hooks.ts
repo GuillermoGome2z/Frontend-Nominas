@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { PosFilters, PosListResponse, PositionDTO } from './api'
 import { listPositions, getPosition, createPosition, updatePosition, togglePositionActive } from './api'
-import { useToast } from '@/components/ui/Toast'
 
 export function usePositions(filters: PosFilters) {
   return useQuery<PosListResponse, Error>({
@@ -23,28 +22,24 @@ export function usePosition(id:number) {
 
 export function useCreatePosition() {
   const qc = useQueryClient()
-  const { success, error } = useToast()
   return useMutation({
     mutationFn: createPosition,
     onSuccess: ()=> {
       qc.invalidateQueries({queryKey:['positions']})
-      success('Puesto creado.')
     },
-    onError: ()=> error('No se pudo crear el puesto.'),
+    // El manejo de errores (incluyendo 409) se hace en el componente
   })
 }
 
 export function useUpdatePosition(id:number) {
   const qc = useQueryClient()
-  const { success, error } = useToast()
   return useMutation({
     mutationFn: (p:Partial<PositionDTO>)=> updatePosition(id,p),
     onSuccess: ()=> {
       qc.invalidateQueries({queryKey:['position',id]})
       qc.invalidateQueries({queryKey:['positions']})
-      success('Puesto actualizado.')
     },
-    onError: ()=> error('No se pudo actualizar el puesto.'),
+    // El manejo de errores (incluyendo 409) se hace en el componente
   })
 }
 

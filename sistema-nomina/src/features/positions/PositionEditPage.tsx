@@ -34,7 +34,35 @@ export default function PositionEditPage() {
             nav('/puestos');
           },
           onError: (e:any)=> {
-            const msg = e?.response?.data?.mensaje ?? e?.message ?? 'Error al actualizar puesto';
+            const status = e?.response?.status;
+            
+            // Manejo de error 409 - Puesto duplicado o tiene empleados activos
+            if (status === 409) {
+              const detail = e?.response?.data?.detail ?? e?.response?.data?.Detail;
+              const title = e?.response?.data?.title ?? e?.response?.data?.Title;
+              
+              // Verificar si es por nombre duplicado o por empleados activos
+              if (detail?.toLowerCase().includes('nombre') || title?.toLowerCase().includes('duplicado')) {
+                showError(`⚠️ Puesto duplicado: ${detail || title || 'Ya existe otro puesto con ese nombre.'}`);
+              } else {
+                showError(`⚠️ Conflicto: ${detail || title || 'No se pudo actualizar el puesto.'}`);
+              }
+              return;
+            }
+            
+            // Manejo de error 422 - Validación
+            if (status === 422) {
+              const detail = e?.response?.data?.detail ?? e?.response?.data?.Detail;
+              const errorMsg = detail || 'Verifica los datos ingresados.';
+              showError(`❌ Error de validación: ${errorMsg}`);
+              return;
+            }
+            
+            // Error genérico
+            const msg = e?.response?.data?.mensaje ?? 
+                       e?.response?.data?.detail ?? 
+                       e?.message ?? 
+                       'Error al actualizar puesto';
             showError(msg);
           },
         })}
