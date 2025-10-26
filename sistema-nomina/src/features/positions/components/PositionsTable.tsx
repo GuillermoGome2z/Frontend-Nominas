@@ -58,6 +58,8 @@ export default function PositionsTable({ rows }: Props) {
           if (status === 409) {
             const d = e?.response?.data;
             const msg =
+              d?.detail ??
+              d?.Detail ??
               d?.message ??
               d?.Message ??
               'No se puede desactivar este puesto porque tiene empleados activos asignados.';
@@ -69,6 +71,8 @@ export default function PositionsTable({ rows }: Props) {
             return;
           }
           showError(
+            e?.response?.data?.detail ??
+            e?.response?.data?.Detail ??
             e?.response?.data?.mensaje ??
             e?.response?.data?.Message ??
             'No se pudo cambiar el estado.'
