@@ -306,9 +306,28 @@ export async function getExpedientesStats(): Promise<{
 }> {
   try {
     const res = await api.get('/expedientes/estadisticas')
-    return res.data
+    return {
+      totalExpedientes: Number(res.data.totalExpedientes || res.data.TotalExpedientes || 0),
+      expedientesActivos: Number(res.data.expedientesActivos || res.data.ExpedientesActivos || 0),
+      expedientesArchivados: Number(res.data.expedientesArchivados || res.data.ExpedientesArchivados || 0),
+      documentosPorTipo: Array.isArray(res.data.documentosPorTipo || res.data.DocumentosPorTipo) 
+        ? (res.data.documentosPorTipo || res.data.DocumentosPorTipo).map((d: any) => ({
+            tipo: d.tipo || d.Tipo || '',
+            cantidad: Number(d.cantidad || d.Cantidad || 0)
+          }))
+        : []
+    }
   } catch (error: any) {
-    console.warn('⚠️ Estadísticas de expedientes no disponibles')
+    // Manejo silencioso de errores - no mostrar warning en consola para errores 500/404
+    if (error?.response?.status === 500 || error?.response?.status === 404) {
+      // Solo log si hay debugging habilitado (en modo desarrollo Vite tiene import.meta.env)
+      if (import.meta.env?.DEV) {
+        console.debug('Estadísticas de expedientes no disponibles:', error?.response?.status)
+      }
+    } else {
+      console.warn('⚠️ Error obteniendo estadísticas de expedientes:', error?.message)
+    }
+    
     return {
       totalExpedientes: 0,
       expedientesActivos: 0,

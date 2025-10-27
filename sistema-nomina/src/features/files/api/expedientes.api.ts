@@ -116,8 +116,41 @@ export async function getDocumentosChecklist(empleadoId: number): Promise<Docume
  * Obtiene estadísticas generales de expedientes
  */
 export async function getExpedienteStats(): Promise<ExpedienteStats> {
-  const response = await api.get('/expedientes/estadisticas')
-  return response.data
+  try {
+    const response = await api.get('/expedientes/estadisticas')
+    
+    // Mapear campos de PascalCase a camelCase si es necesario
+    const data = response.data
+    return {
+      totalEmpleados: data.TotalEmpleados ?? data.totalEmpleados ?? 0,
+      expedientesCompletos: data.ExpedientesCompletos ?? data.expedientesCompletos ?? 0,
+      expedientesIncompletos: data.ExpedientesIncompletos ?? data.expedientesIncompletos ?? 0,
+      expedientesPendientes: data.ExpedientesPendientes ?? data.expedientesPendientes ?? 0,
+      documentosVencidos: data.DocumentosVencidos ?? data.documentosVencidos ?? 0,
+      documentosPorVencer: data.DocumentosPorVencer ?? data.documentosPorVencer ?? 0,
+      porcentajeCompletoGeneral: data.PorcentajeCompletoGeneral ?? data.porcentajeCompletoGeneral ?? 0,
+    }
+  } catch (error: any) {
+    // Manejo silencioso para errores conocidos del backend
+    if (error?.response?.status === 500 || error?.response?.status === 404) {
+      if (import.meta.env?.DEV) {
+        console.debug('Estadísticas de expedientes no disponibles:', error?.response?.status)
+      }
+      // Retornar valores por defecto
+      return {
+        totalEmpleados: 0,
+        expedientesCompletos: 0,
+        expedientesIncompletos: 0,
+        expedientesPendientes: 0,
+        documentosVencidos: 0,
+        documentosPorVencer: 0,
+        porcentajeCompletoGeneral: 0,
+      }
+    } else {
+      console.warn('⚠️ Error obteniendo estadísticas de expedientes:', error?.message)
+      throw error
+    }
+  }
 }
 
 // ==================== DOCUMENTOS ====================
