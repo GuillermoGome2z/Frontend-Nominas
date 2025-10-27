@@ -114,6 +114,33 @@ export function useNominaStats() {
   })
 }
 
+// Hook para obtener detalles de múltiples nóminas (para exportación)
+export function useNominasWithDetalles(nominas: NominaDTO[]) {
+  return useQuery({
+    queryKey: ['nominas-with-detalles', nominas.map(n => n.id).sort()],
+    queryFn: async () => {
+      if (!nominas.length) return []
+      
+      const nominasWithDetalles = await Promise.all(
+        nominas.map(async (nomina) => {
+          try {
+            const detalles = await getNominaDetalle(nomina.id)
+            return { nomina, detalles }
+          } catch (error) {
+            console.error(`Error obteniendo detalles de nómina ${nomina.id}:`, error)
+            return { nomina, detalles: [] }
+          }
+        })
+      )
+      
+      return nominasWithDetalles
+    },
+    enabled: nominas.length > 0,
+    staleTime: 1000 * 60 * 2, // 2 minutos
+    refetchOnWindowFocus: false,
+  })
+}
+
 // Hook para crear nómina
 export function useCreateNomina() {
   const queryClient = useQueryClient()
@@ -315,3 +342,6 @@ export function getExencionesDescription(tipo: string): string {
 
 // Re-exportar hooks de validación
 export { useValidacionCumplimiento, useEstadisticasCumplimiento } from './hooks/useValidacionCumplimiento'
+
+// Re-exportar hooks de exportación
+export { useExportNomina, useExportNominaMultiple } from './hooks/useExportNomina'
