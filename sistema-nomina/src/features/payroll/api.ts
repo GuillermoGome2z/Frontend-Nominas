@@ -206,29 +206,34 @@ function mapNomina(x: any): NominaDTO {
 }
 
 function mapNominaDetalle(x: any): NominaDetalleDTO {
+
+
   return {
     id: x.id ?? x.Id ?? 0,
     nominaId: x.nominaId ?? x.NominaId ?? 0,
     empleadoId: x.empleadoId ?? x.EmpleadoId ?? 0,
-    nombreCompleto: x.nombreCompleto ?? x.NombreCompleto ?? '',
-    departamento: x.departamento ?? x.Departamento ?? '',
-    puesto: x.puesto ?? x.Puesto ?? '',
-    diasTrabajados: Number(x.diasTrabajados ?? x.DiasTrabajados ?? 0),
+    nombreCompleto: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '', // ← Usar nombreEmpleado
+    departamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '', // ← Usar nombreDepartamento
+    puesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '', // ← Usar nombrePuesto
+    diasTrabajados: Number(x.diasTrabajados ?? x.DiasTrabajados ?? x.dias ?? x.Dias ?? 30),
     horasOrdinarias: Number(x.horasOrdinarias ?? x.HorasOrdinarias ?? 0),
     horasExtra50: Number(x.horasExtra50 ?? x.HorasExtra50 ?? 0),
     horasExtra100: Number(x.horasExtra100 ?? x.HorasExtra100 ?? 0),
-    salarioBase: Number(x.salarioBase ?? x.SalarioBase ?? 0),
-    bonificaciones: Number(x.bonificaciones ?? x.Bonificaciones ?? 0),
+    salarioBase: Number(x.salarioBruto ?? x.SalarioBruto ?? 0), // ← Usar salarioBruto del backend
+    bonificaciones: Number(x.bonificaciones ?? x.Bonificaciones ?? 250), // Bono Decreto Guatemala
     comisiones: Number(x.comisiones ?? x.Comisiones ?? 0),
     horasExtraValor: Number(x.horasExtraValor ?? x.HorasExtraValor ?? 0),
-    totalDevengado: Number(x.totalDevengado ?? x.TotalDevengado ?? 0),
-    igss: Number(x.igss ?? x.Igss ?? x.IGSS ?? 0),
-    isr: Number(x.isr ?? x.Isr ?? x.ISR ?? 0),
-    prestamos: Number(x.prestamos ?? x.Prestamos ?? 0),
-    anticipos: Number(x.anticipos ?? x.Anticipos ?? 0),
-    otrosDeducciones: Number(x.otrosDeducciones ?? x.OtrosDeducciones ?? 0),
-    totalDeducciones: Number(x.totalDeducciones ?? x.TotalDeducciones ?? 0),
-    sueldoNeto: Number(x.sueldoNeto ?? x.SueldoNeto ?? 0),
+    totalDevengado: Number(x.salarioBruto ?? x.SalarioBruto ?? 0), // ← Total bruto
+    
+    // Deducciones específicas - usar campos del backend
+    igss: Number(x.igss ?? x.Igss ?? 0), // IGSS desde backend
+    isr: Number(x.isr ?? x.Isr ?? 0), // ISR desde backend
+    prestamos: Number(x.prestamos ?? x.Prestamos ?? 0), // Préstamos desde backend
+    anticipos: Number(x.anticipos ?? x.Anticipos ?? 0), // Anticipos desde backend
+    otrosDeducciones: Number(x.otrasDeducciones ?? x.OtrasDeducciones ?? x.otrosDeducciones ?? 0), // Otras deducciones
+    
+    totalDeducciones: Number(x.deducciones ?? x.Deducciones ?? 0), // ← Usar deducciones del backend
+    sueldoNeto: Number(x.salarioNeto ?? x.SalarioNeto ?? 0), // ← Usar salarioNeto del backend
     observaciones: x.observaciones ?? x.Observaciones
   }
 }
@@ -310,9 +315,18 @@ export async function getNomina(id: number): Promise<NominaDTO> {
 
 // Obtener detalle de nómina (empleados)
 export async function getNominaDetalle(nominaId: number): Promise<NominaDetalleDTO[]> {
-  const res = await api.get(`/nominas/${nominaId}/detalles`)
-  const data = Array.isArray(res.data) ? res.data : res.data.data ?? []
-  return data.map(mapNominaDetalle)
+  try {
+    const res = await api.get(`/nominas/${nominaId}/detalles`)
+    
+    // El backend devuelve los empleados en la propiedad 'items'
+    const data = res.data.items ?? res.data.data ?? res.data ?? []
+    const mappedData = Array.isArray(data) ? data.map(mapNominaDetalle) : []
+    
+    return mappedData
+  } catch (error) {
+    console.error('❌ Error obteniendo detalle de nómina:', error)
+    throw error
+  }
 }
 
 // Crear nueva nómina

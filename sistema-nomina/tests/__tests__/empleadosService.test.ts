@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import { empleadosService } from '../services/empleadosService'
-import { api } from '../lib/http'
+import { empleadosService } from '@/services/empleadosService'
+import { api } from '@/lib/http'
 
 vi.mock('../lib/http')
 
