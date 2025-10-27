@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, BadgeDollarSign, FileBarChart, FolderOpen, X, Building2, Briefcase } from 'lucide-react'
+import { LayoutDashboard, Users, BadgeDollarSign, FileBarChart, FolderOpen, X, Building2, Briefcase, Settings } from 'lucide-react'
 
 type SidebarProps = {
   open: boolean
@@ -12,6 +12,7 @@ const items = [
   { to: '/departamentos', label: 'Departamentos', icon: Building2 },
   { to: '/puestos', label: 'Puestos', icon: Briefcase },
   { to: '/nomina', label: 'Nómina', icon: BadgeDollarSign },
+  { to: '/reglas-laborales', label: 'Reglas Laborales', icon: Settings },
   { to: '/reportes', label: 'Reportes', icon: FileBarChart },
   { to: '/expedientes', label: 'Expedientes', icon: FolderOpen },
 ]

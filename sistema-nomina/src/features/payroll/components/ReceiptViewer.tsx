@@ -53,7 +53,7 @@ export function ReceiptViewer({ isOpen, onClose, line }: ReceiptViewerProps) {
                 <h4 className="font-semibold text-gray-700 mb-2">Ingresos</h4>
                 <div className="space-y-1">
                   {line.conceptos
-                    .filter((c) => c.tipo === 'Ingreso')
+                    ?.filter((c) => c.tipo === 'Ingreso')
                     .map((concepto) => (
                       <div key={concepto.id} className="flex justify-between text-sm">
                         <span>{concepto.nombre}:</span>
@@ -71,7 +71,7 @@ export function ReceiptViewer({ isOpen, onClose, line }: ReceiptViewerProps) {
                 <h4 className="font-semibold text-gray-700 mb-2">Deducciones</h4>
                 <div className="space-y-1">
                   {line.conceptos
-                    .filter((c) => c.tipo === 'Deduccion')
+                    ?.filter((c) => c.tipo === 'Deduccion')
                     .map((concepto) => (
                       <div key={concepto.id} className="flex justify-between text-sm">
                         <span>{concepto.nombre}:</span>
@@ -85,7 +85,7 @@ export function ReceiptViewer({ isOpen, onClose, line }: ReceiptViewerProps) {
                 </div>
               </div>
 
-              {line.ajustes.length > 0 && (
+              {line.ajustes && line.ajustes.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-700 mb-2">Ajustes</h4>
                   <div className="space-y-1">

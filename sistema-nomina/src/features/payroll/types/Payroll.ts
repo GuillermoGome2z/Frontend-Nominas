@@ -3,22 +3,82 @@ export type PeriodType = 'Quincenal' | 'Mensual' | 'Semanal';
 export type PeriodStatus = 'Borrador' | 'Calculado' | 'Publicado' | 'Cerrado';
 export type ConceptType = 'Ingreso' | 'Deduccion';
 
+// Reglas Laborales Guatemala 2025
+export interface ReglasLaborales {
+  id: number;
+  pais: string;
+  vigenciaDesde: string;
+  vigenciaHasta?: string;
+  
+  // Porcentajes IGSS
+  igssEmpleadoPorcentaje: number;
+  igssPatronalPorcentaje: number;
+  
+  // Porcentajes otros aportes
+  irtraPorcentaje: number;
+  intecapPorcentaje: number;
+  
+  // Horas extras
+  horasExtrasPorcentaje: number;
+  horasNocturnasPorcentaje: number;
+  
+  // Bonos y salarios
+  bonoDecretoMonto: number;
+  salarioMinimo: number;
+  
+  // ISR (JSON con escala progresiva)
+  isrEscalaJson: string;
+  isrExencionBase: number;
+  
+  // Metadata
+  activo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Escala ISR deserializada
+export interface IsrTramo {
+  desde: number;
+  hasta?: number; // undefined = infinito
+  tasa: number;
+}
+
 // Interfaces principales
 export interface PayrollPeriod {
   id: number;
   nombre: string;
   tipo: PeriodType;
+  
+  // Campos nuevos Guatemala 2025
+  tipoPeriodo?: string; // 'Mensual' | 'Quincenal'
+  anio?: number;
+  mes?: number;
+  quincena?: number; // 1 o 2 (solo si es quincenal)
+  fechaCorte?: string;
+  
+  // Fechas originales
   fechaInicio: string;
   fechaFin: string;
   fechaPago?: string;
+  
+  // Estado y totales
   estado: PeriodStatus;
   totalEmpleados: number;
   totalIngresos: number;
   totalDeducciones: number;
   totalNeto: number;
+  
+  // Aportes patronales (nuevos)
+  totalIgssPatronal?: number;
+  totalIrtra?: number;
+  totalIntecap?: number;
+  
+  // Auditoría
+  creadoPor?: string;
   calculadoAt?: string;
   publicadoAt?: string;
   cerradoAt?: string;
+  cerradoEn?: string; // Timestamp de cierre inmutable
   createdAt: string;
   updatedAt: string;
 }
@@ -32,11 +92,47 @@ export interface PayrollLine {
   puesto: string;
   puestoNombre?: string;
   departamento: string;
+  
+  // Salario base
+  salarioBase: number;
+  salarioOrdinario: number;
+  
+  // Horas trabajadas
+  horasOrdinarias?: number;
+  horasExtras?: number;
+  montoHorasExtras?: number;
+  
+  // Bonificaciones y otros ingresos
+  bonoDecreto?: number;
+  comisiones?: number;
+  bonos?: number;
+  otrosIngresos?: number;
+  
+  // Totales de ingresos
   totalIngresos: number;
+  
+  // Deducciones legales
+  igssEmpleado?: number;
+  isr?: number;
+  
+  // Otras deducciones
+  anticipos?: number;
+  prestamos?: number;
+  otrasDeducciones?: number;
+  
+  // Total deducciones y neto
   totalDeducciones: number;
-  salarioNeto: number;
-  conceptos: PayrollConcept[];
-  ajustes: PayrollAdjustment[];
+  liquidoAPagar: number;
+  salarioNeto: number; // Alias de liquidoAPagar para retrocompat
+  
+  // Conceptos detallados (opcional)
+  conceptos?: PayrollConcept[];
+  ajustes?: PayrollAdjustment[];
+  
+  // Aportes patronales (solo informativo, no afecta neto empleado)
+  igssPatronal?: number;
+  irtra?: number;
+  intecap?: number;
 }
 
 export interface PayrollConcept {

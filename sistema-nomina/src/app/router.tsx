@@ -30,6 +30,7 @@ import PositionEditPage from '../features/positions/PositionEditPage'
 
 import PayrollMainPage from '../features/payroll/pages/PayrollMainPage';
 import PayrollDetailPage from '../features/payroll/pages/PayrollDetailPage';
+import { ReglasLaboralesPage } from '../features/payroll/ReglasLaboralesPage';
 import ReportsPage from '../features/reports/ReportsPage';
 import FilesPage from '../features/files/FilesPage';
 import ExpedienteDetailPage from '../features/files/ExpedienteDetailPage';
@@ -200,6 +201,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard roles={['ADMIN']}>
             <PayrollDetailPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'reglas-laborales',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <ReglasLaboralesPage />
           </RoleGuard>
         ),
       },
