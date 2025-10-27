@@ -39,10 +39,11 @@ export type Kpis = {
 
 export async function getKpis(): Promise<Kpis> {
   try {
-    // Obtener estadísticas de nóminas y empleados en paralelo
-    const [nominasRes, empleadosRes] = await Promise.allSettled([
+    // Obtener estadísticas de nóminas y empleados agrupados por departamento en paralelo
+    const [nominasRes, empleadosRes, empleadosFullRes] = await Promise.allSettled([
       api.get('/nominas/stats'),
-      api.get('/empleados?page=1&pageSize=1')
+      api.get('/empleados?page=1&pageSize=1'),
+      api.get('/empleados?page=1&pageSize=1000&estado=activo') // Obtener empleados activos para agrupar
     ])
     
     // Mapear respuesta de nóminas
@@ -63,13 +64,48 @@ export async function getKpis(): Promise<Kpis> {
                0)
     }
     
+    // Agrupar empleados por departamento
+    let activosPorDepartamento: DepartamentoActivos[] = []
+    if (empleadosFullRes.status === 'fulfilled') {
+      const empleados = empleadosFullRes.value.data?.empleados ?? empleadosFullRes.value.data?.data ?? empleadosFullRes.value.data ?? []
+      
+      if (Array.isArray(empleados)) {
+        // Crear un mapa para contar empleados por departamento
+        const departamentosMap = new Map<string, number>()
+        
+        empleados.forEach((emp: any) => {
+          // Debug: ver la estructura del empleado
+          if (import.meta.env?.DEV) {
+            console.log('Empleado estructura:', emp)
+          }
+          
+          const deptName = emp.departamento?.nombre ?? 
+                          emp.departamento?.Nombre ?? 
+                          emp.Departamento?.nombre ?? 
+                          emp.Departamento?.Nombre ?? 
+                          emp.departamentoNombre ?? 
+                          emp.DepartamentoNombre ?? 
+                          emp.departamento ?? 
+                          emp.Departamento ?? 
+                          'Sin Departamento'
+          
+          departamentosMap.set(deptName, (departamentosMap.get(deptName) || 0) + 1)
+        })
+        
+        // Convertir el mapa a array y ordenar por cantidad descendente
+        activosPorDepartamento = Array.from(departamentosMap.entries())
+          .map(([departamento, activos]) => ({ departamento, activos }))
+          .sort((a, b) => b.activos - a.activos)
+      }
+    }
+    
     return {
       totalEmpleados: totalEmpleados || Number(nominasData.empleadosEnNomina ?? nominasData.EmpleadosEnNomina ?? 0),
       nominaPendienteQ: Number(nominasData.totalPagadoMesActual ?? nominasData.TotalPagadoMesActual ?? 0),
       proximoPago: nominasData.proximaFechaPago ?? nominasData.ProximaFechaPago,
       nominasGeneradasEnMes: Number(nominasData.nominasDelMes ?? nominasData.NominasDelMes ?? 0),
       nominasGeneradasEnMesAnterior: Number(nominasData.nominasPendientes ?? nominasData.NominasPendientes ?? 0),
-      activosPorDepartamento: []
+      activosPorDepartamento: activosPorDepartamento
     }
   } catch (error) {
     console.warn('Error obteniendo estadísticas del dashboard:', error)

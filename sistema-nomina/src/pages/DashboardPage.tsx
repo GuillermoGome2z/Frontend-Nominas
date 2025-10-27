@@ -166,7 +166,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Departamentos Activos */}
+        {/* Empleados por Departamento */}
         {data?.activosPorDepartamento && data.activosPorDepartamento.length > 0 && (
           <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-lg border border-white/20">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
