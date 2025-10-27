@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { empleadosService } from '../services/empleadosService'
-import { api } from '../lib/http'
+import { empleadosService } from '../../src/services/empleadosService'
+import { api } from '../../src/lib/http'
 
-vi.mock('../lib/http')
+vi.mock('../../src/lib/http')
 
 describe('empleadosService', () => {
   describe('getAll', () => {

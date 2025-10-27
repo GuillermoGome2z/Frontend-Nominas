@@ -30,6 +30,8 @@ import PositionEditPage from '../features/positions/PositionEditPage'
 
 import PayrollMainPage from '../features/payroll/pages/PayrollMainPage';
 import PayrollDetailPage from '../features/payroll/pages/PayrollDetailPage';
+import VerificarCalculosPage from '../features/payroll/pages/VerificarCalculosPage';
+import PruebaCalculosPage from '../features/payroll/pages/PruebaCalculosPage';
 import { ReglasLaboralesPage } from '../features/payroll/ReglasLaboralesPage';
 import ReportsPage from '../features/reports/ReportsPage';
 import FilesPage from '../features/files/FilesPage';
@@ -209,6 +211,22 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard roles={['ADMIN']}>
             <ReglasLaboralesPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'verificar-calculos',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <VerificarCalculosPage />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'prueba-calculos',
+        element: (
+          <RoleGuard roles={['ADMIN']}>
+            <PruebaCalculosPage />
           </RoleGuard>
         ),
       },

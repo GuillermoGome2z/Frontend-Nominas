@@ -36,31 +36,46 @@ export interface NominaDTO {
   observaciones?: string
 }
 
-// DTO para detalle de empleado en nómina
+// DTO para detalle de empleado en nómina - Actualizado Guatemala 2025
 export interface NominaDetalleDTO {
   id: number
   nominaId: number
   empleadoId: number
   nombreCompleto: string
+  nombreEmpleado: string // Nuevo campo del backend
   departamento: string
+  nombreDepartamento: string // Nuevo campo del backend
   puesto: string
+  nombrePuesto: string // Nuevo campo del backend
   diasTrabajados: number
   horasOrdinarias: number
   horasExtra50: number
   horasExtra100: number
   salarioBase: number
+  salarioBruto: number // Campo principal del backend
   bonificaciones: number
+  bonoDecreto: number // Separado del total de bonificaciones
   comisiones: number
   horasExtraValor: number
   totalDevengado: number
+  
+  // Deducciones detalladas (nuevos campos backend)
   igss: number
   isr: number
   prestamos: number
   anticipos: number
-  otrosDeducciones: number
+  otrasDeducciones: number // Renombrado para consistencia
+  otrosDeducciones: number // Mantener compatibilidad
+  
   totalDeducciones: number
   sueldoNeto: number
+  salarioNeto: number // Campo alternativo del backend
   observaciones?: string
+  
+  // Campos adicionales para debugging/auditoría
+  esPromedioAnual?: boolean // Indica si usa promedio 12 meses
+  baseIgssCalculada?: number // Base real usada para IGSS
+  exencionAplicada?: string // Tipo de exención aplicada
 }
 
 // DTO para crear nueva nómina
@@ -207,29 +222,50 @@ function mapNomina(x: any): NominaDTO {
 
 function mapNominaDetalle(x: any): NominaDetalleDTO {
   return {
-    id: x.id ?? x.Id ?? 0,
-    nominaId: x.nominaId ?? x.NominaId ?? 0,
-    empleadoId: x.empleadoId ?? x.EmpleadoId ?? 0,
-    nombreCompleto: x.nombreCompleto ?? x.NombreCompleto ?? '',
-    departamento: x.departamento ?? x.Departamento ?? '',
-    puesto: x.puesto ?? x.Puesto ?? '',
-    diasTrabajados: Number(x.diasTrabajados ?? x.DiasTrabajados ?? 0),
+    id: Number(x.id ?? x.Id ?? 0),
+    nominaId: Number(x.nominaId ?? x.NominaId ?? 0),
+    empleadoId: Number(x.empleadoId ?? x.EmpleadoId ?? 0),
+    
+    // Nombres (compatibilidad con nuevos campos backend)
+    nombreCompleto: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '',
+    nombreEmpleado: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '',
+    departamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '',
+    nombreDepartamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '',
+    puesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '',
+    nombrePuesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '',
+    
+    // Tiempo y horas
+    diasTrabajados: Number(x.diasTrabajados ?? x.DiasTrabajados ?? x.dias ?? x.Dias ?? 30),
     horasOrdinarias: Number(x.horasOrdinarias ?? x.HorasOrdinarias ?? 0),
     horasExtra50: Number(x.horasExtra50 ?? x.HorasExtra50 ?? 0),
     horasExtra100: Number(x.horasExtra100 ?? x.HorasExtra100 ?? 0),
-    salarioBase: Number(x.salarioBase ?? x.SalarioBase ?? 0),
+    
+    // Salarios (usando nuevos campos del backend Guatemala 2025)
+    salarioBase: Number(x.salarioBase ?? x.SalarioBase ?? x.salarioBruto ?? x.SalarioBruto ?? 0),
+    salarioBruto: Number(x.salarioBruto ?? x.SalarioBruto ?? x.salarioBase ?? x.SalarioBase ?? 0),
     bonificaciones: Number(x.bonificaciones ?? x.Bonificaciones ?? 0),
+    bonoDecreto: Number(x.bonoDecreto ?? x.BonoDecreto ?? 0), // Separado en nueva implementación
     comisiones: Number(x.comisiones ?? x.Comisiones ?? 0),
     horasExtraValor: Number(x.horasExtraValor ?? x.HorasExtraValor ?? 0),
-    totalDevengado: Number(x.totalDevengado ?? x.TotalDevengado ?? 0),
-    igss: Number(x.igss ?? x.Igss ?? x.IGSS ?? 0),
-    isr: Number(x.isr ?? x.Isr ?? x.ISR ?? 0),
+    totalDevengado: Number(x.totalDevengado ?? x.TotalDevengado ?? x.salarioBruto ?? x.SalarioBruto ?? 0),
+    
+    // Deducciones detalladas (nuevos campos backend Guatemala 2025)
+    igss: Number(x.igss ?? x.Igss ?? 0),
+    isr: Number(x.isr ?? x.Isr ?? 0),
     prestamos: Number(x.prestamos ?? x.Prestamos ?? 0),
     anticipos: Number(x.anticipos ?? x.Anticipos ?? 0),
-    otrosDeducciones: Number(x.otrosDeducciones ?? x.OtrosDeducciones ?? 0),
-    totalDeducciones: Number(x.totalDeducciones ?? x.TotalDeducciones ?? 0),
-    sueldoNeto: Number(x.sueldoNeto ?? x.SueldoNeto ?? 0),
-    observaciones: x.observaciones ?? x.Observaciones
+    otrasDeducciones: Number(x.otrasDeducciones ?? x.OtrasDeducciones ?? 0),
+    otrosDeducciones: Number(x.otrosDeducciones ?? x.OtrosDeducciones ?? x.otrasDeducciones ?? x.OtrasDeducciones ?? 0),
+    
+    totalDeducciones: Number(x.totalDeducciones ?? x.TotalDeducciones ?? x.deducciones ?? x.Deducciones ?? 0),
+    sueldoNeto: Number(x.sueldoNeto ?? x.SueldoNeto ?? x.salarioNeto ?? x.SalarioNeto ?? 0),
+    salarioNeto: Number(x.salarioNeto ?? x.SalarioNeto ?? x.sueldoNeto ?? x.SueldoNeto ?? 0),
+    
+    // Campos adicionales para auditoría
+    observaciones: x.observaciones ?? x.Observaciones,
+    esPromedioAnual: x.esPromedioAnual ?? x.EsPromedioAnual ?? false,
+    baseIgssCalculada: Number(x.baseIgssCalculada ?? x.BaseIgssCalculada ?? 0),
+    exencionAplicada: x.exencionAplicada ?? x.ExencionAplicada ?? ''
   }
 }
 
@@ -310,9 +346,18 @@ export async function getNomina(id: number): Promise<NominaDTO> {
 
 // Obtener detalle de nómina (empleados)
 export async function getNominaDetalle(nominaId: number): Promise<NominaDetalleDTO[]> {
-  const res = await api.get(`/nominas/${nominaId}/detalles`)
-  const data = Array.isArray(res.data) ? res.data : res.data.data ?? []
-  return data.map(mapNominaDetalle)
+  try {
+    const res = await api.get(`/nominas/${nominaId}/detalles`)
+    
+    // El backend devuelve los empleados en la propiedad 'items'
+    const data = res.data.items ?? res.data.data ?? res.data ?? []
+    const mappedData = Array.isArray(data) ? data.map(mapNominaDetalle) : []
+    
+    return mappedData
+  } catch (error) {
+    console.error('❌ Error obteniendo detalle de nómina:', error)
+    throw error
+  }
 }
 
 // Crear nueva nómina

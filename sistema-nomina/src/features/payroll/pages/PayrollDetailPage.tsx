@@ -8,6 +8,7 @@ const formatDate = (dateString: string) => {
   return formatDateTime(dateString)
 }
 import Loader from '@/components/ui/Loader'
+import CumplimientoLegal from '../components/CumplimientoLegal'
 import type { NominaDetalleDTO, EstadoNomina } from '../api'
 
 export default function PayrollDetailPage() {
@@ -215,6 +216,18 @@ export default function PayrollDetailPage() {
         </div>
       </div>
       
+      {/* Indicador de Cumplimiento Legal Guatemala 2025 */}
+      {detalleData && (
+        <CumplimientoLegal
+          tipoNomina={nomina.tipoNomina}
+          totalEmpleados={nomina.cantidadEmpleados}
+          empleadosConIgssExento={detalleData.filter(d => d.igss === 0).length}
+          empleadosConIsrExento={detalleData.filter(d => d.isr === 0).length}
+          bonoDecretoAplicado={detalleData.reduce((sum, d) => sum + (d.bonoDecreto || 0), 0)}
+          className="mb-6"
+        />
+      )}
+      
       {/* Tabs */}
       <div className="bg-white rounded-lg border">
         <div className="border-b border-gray-200">
@@ -319,19 +332,31 @@ export default function PayrollDetailPage() {
                   <table className="w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Empleado
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Salario Base
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Bonificaciones
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Deducciones
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          IGSS
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ISR
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Préstamos
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Anticipos
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Otras Deduc.
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-blue-600 uppercase tracking-wider">
                           Total Neto
                         </th>
                       </tr>
@@ -339,7 +364,7 @@ export default function PayrollDetailPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {detalleData.map((detalle: NominaDetalleDTO) => (
                         <tr key={detalle.empleadoId} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {detalle.nombreCompleto}
                             </div>
@@ -347,16 +372,34 @@ export default function PayrollDetailPage() {
                               {detalle.departamento}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
                             {formatCurrency(detalle.salarioBase)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-green-600">
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-green-600">
                             {formatCurrency(detalle.bonificaciones + detalle.comisiones + detalle.horasExtraValor)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-red-600">
-                            {formatCurrency(detalle.totalDeducciones)}
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-red-600">
+                            Q {detalle.igss.toFixed(2)}
+                            {detalle.igss === 0 && (
+                              <span className="ml-1 text-xs text-green-600" title="Exento IGSS">✓</span>
+                            )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-red-600">
+                            Q {detalle.isr.toFixed(2)}
+                            {detalle.isr === 0 && (
+                              <span className="ml-1 text-xs text-green-600" title="Exento ISR">✓</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-red-600">
+                            Q {detalle.prestamos.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-red-600">
+                            Q {detalle.anticipos.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-red-600">
+                            Q {detalle.otrasDeducciones.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
                             {formatCurrency(detalle.sueldoNeto)}
                           </td>
                         </tr>
