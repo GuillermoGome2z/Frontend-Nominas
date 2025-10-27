@@ -38,6 +38,49 @@ export type Kpis = {
 }
 
 export async function getKpis(): Promise<Kpis> {
-  const res = await api.get('/Dashboard')
-  return res.data as Kpis
+  try {
+    // Obtener estadísticas de nóminas y empleados en paralelo
+    const [nominasRes, empleadosRes] = await Promise.allSettled([
+      api.get('/nominas/stats'),
+      api.get('/empleados?page=1&pageSize=1')
+    ])
+    
+    // Mapear respuesta de nóminas
+    let nominasData: any = {}
+    if (nominasRes.status === 'fulfilled') {
+      nominasData = nominasRes.value.data
+    }
+    
+    // Obtener total de empleados desde header o metadata
+    let totalEmpleados = 0
+    if (empleadosRes.status === 'fulfilled') {
+      const empRes = empleadosRes.value
+      totalEmpleados = 
+        Number(empRes.headers?.['x-total-count'] ?? 
+               empRes.headers?.['X-Total-Count'] ?? 
+               empRes.data?.total ?? 
+               empRes.data?.Total ?? 
+               0)
+    }
+    
+    return {
+      totalEmpleados: totalEmpleados || Number(nominasData.empleadosEnNomina ?? nominasData.EmpleadosEnNomina ?? 0),
+      nominaPendienteQ: Number(nominasData.totalPagadoMesActual ?? nominasData.TotalPagadoMesActual ?? 0),
+      proximoPago: nominasData.proximaFechaPago ?? nominasData.ProximaFechaPago,
+      nominasGeneradasEnMes: Number(nominasData.nominasDelMes ?? nominasData.NominasDelMes ?? 0),
+      nominasGeneradasEnMesAnterior: Number(nominasData.nominasPendientes ?? nominasData.NominasPendientes ?? 0),
+      activosPorDepartamento: []
+    }
+  } catch (error) {
+    console.warn('Error obteniendo estadísticas del dashboard:', error)
+    // Devolver valores por defecto en caso de error
+    return {
+      totalEmpleados: 0,
+      nominaPendienteQ: 0,
+      proximoPago: undefined,
+      nominasGeneradasEnMes: 0,
+      nominasGeneradasEnMesAnterior: 0,
+      activosPorDepartamento: []
+    }
+  }
 }

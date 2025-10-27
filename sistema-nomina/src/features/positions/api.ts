@@ -46,7 +46,30 @@ export async function listPositions(f: PosFilters = {}): Promise<PosListResponse
     data = data.filter(p => p.departamentoId === f.departamentoId)
   }
 
-  return { data, meta:{ total: total || data.length, page: f.page ?? 1, pageSize: f.pageSize ?? data.length } }
+  // ⚠️ FALLBACK: Si el backend no pagina, hacerlo en el frontend
+  const totalRecords = total || data.length
+  const page = f.page ?? 1
+  const pageSize = f.pageSize ?? 10
+  
+  // Si recibimos más registros de los esperados, el backend no está paginando
+  if (data.length > pageSize) {
+    // Ordenar por ID descendente (más recientes primero)
+    data.sort((a, b) => b.id - a.id)
+    
+    // Aplicar paginación manual
+    const startIndex = (page - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    data = data.slice(startIndex, endIndex)
+  }
+
+  return { 
+    data, 
+    meta: { 
+      total: totalRecords, 
+      page, 
+      pageSize 
+    } 
+  }
 }
 
 export async function getPosition(id:number): Promise<PositionDTO> {

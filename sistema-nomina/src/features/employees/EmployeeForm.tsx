@@ -31,6 +31,9 @@ const yearsBetween = (a: Date, b: Date) => {
 }
 
 export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Props) {
+  // Detectar si es modo edición
+  const isEditMode = !!defaultValues?.id
+  
   // ----- Form state -----
   const [nombreCompleto, setNombreCompleto] = useState(defaultValues?.nombreCompleto ?? '')
   const [correo, setCorreo] = useState(defaultValues?.correo ?? '')
@@ -205,20 +208,22 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
   const departamentos: DepartmentDTO[] = useMemo(() => deptsData?.data ?? [], [deptsData])
   const puestos: PositionDTO[] = useMemo(() => possData?.data ?? [], [possData])
 
-  // Si cambia el departamento, resetea puesto y salario
+  // Si cambia el departamento, resetea puesto (y salario solo en modo creación)
   useEffect(() => {
     setPuestoId(undefined)
-    setSalarioMensual('')
-  }, [departamentoId])
+    if (!isEditMode) {
+      setSalarioMensual('')
+    }
+  }, [departamentoId, isEditMode])
 
-  // Cuando cambia el puesto, setea automáticamente el salario base
+  // Cuando cambia el puesto, setea automáticamente el salario base (solo en modo creación)
   useEffect(() => {
-    if (!puestoId) return
+    if (!puestoId || isEditMode) return
     const p = puestos.find((x) => x.id === puestoId)
     if (p && p.salarioBase) {
       setSalarioMensual(Number(p.salarioBase))
     }
-  }, [puestoId, puestos])
+  }, [puestoId, puestos, isEditMode])
 
   // ---------- Submit con validación ----------
   const handleSubmit = (e: React.FormEvent) => {
@@ -665,8 +670,13 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
             step="0.01"
             min="2500"
             value={salarioMensual}
-            readOnly
-            className={`w-full rounded-xl border bg-gray-50 px-3 py-2 font-semibold text-gray-700 transition focus:outline-none ${
+            onChange={(e) => setSalarioMensual(e.target.value === '' ? '' : Number(e.target.value))}
+            readOnly={!isEditMode}
+            className={`w-full rounded-xl border px-3 py-2 font-semibold transition focus:outline-none ${
+              isEditMode 
+                ? 'bg-white text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500' 
+                : 'bg-gray-50 text-gray-700'
+            } ${
               errors.salarioMensual ? 'border-rose-400' : ''
             }`}
             aria-describedby={errors.salarioMensual ? 'error-salarioMensual' : 'help-salarioMensual'}
@@ -677,9 +687,14 @@ export default function EmployeeForm({ defaultValues, onSubmit, submitting }: Pr
               {errors.salarioMensual}
             </p>
           )}
-          {!errors.salarioMensual && (
+          {!errors.salarioMensual && !isEditMode && (
             <p id="help-salarioMensual" className="mt-1 text-xs text-indigo-600">
               ✓ Se asigna automáticamente según el puesto
+            </p>
+          )}
+          {!errors.salarioMensual && isEditMode && (
+            <p id="help-salarioMensual" className="mt-1 text-xs text-amber-600">
+              💡 Puedes modificar el salario manualmente (ej: para aumentos)
             </p>
           )}
         </div>

@@ -54,15 +54,48 @@ function mapLine(raw: any): PayrollLine {
     puestoNombre: raw.puestoNombre ?? raw.PuestoNombre,
     puesto: raw.puesto ?? raw.Puesto ?? raw.puestoNombre ?? raw.PuestoNombre ?? '',
     departamento: raw.departamento ?? raw.Departamento ?? raw.departamentoNombre ?? raw.DepartamentoNombre ?? '',
+    
+    // Salarios base
+    salarioBase: raw.salarioBase ?? raw.SalarioBase ?? 0,
+    salarioOrdinario: raw.salarioOrdinario ?? raw.SalarioOrdinario ?? raw.salarioBase ?? raw.SalarioBase ?? 0,
+    
+    // Horas
+    horasOrdinarias: raw.horasOrdinarias ?? raw.HorasOrdinarias,
+    horasExtras: raw.horasExtras ?? raw.HorasExtras,
+    montoHorasExtras: raw.montoHorasExtras ?? raw.MontoHorasExtras,
+    
+    // Bonificaciones
+    bonoDecreto: raw.bonoDecreto ?? raw.BonoDecreto,
+    comisiones: raw.comisiones ?? raw.Comisiones,
+    bonos: raw.bonos ?? raw.Bonos,
+    otrosIngresos: raw.otrosIngresos ?? raw.OtrosIngresos,
+    
+    // Totales
     totalIngresos: raw.totalIngresos ?? raw.TotalIngresos ?? 0,
+    
+    // Deducciones
+    igssEmpleado: raw.igssEmpleado ?? raw.IgssEmpleado,
+    isr: raw.isr ?? raw.Isr,
+    anticipos: raw.anticipos ?? raw.Anticipos,
+    prestamos: raw.prestamos ?? raw.Prestamos,
+    otrasDeducciones: raw.otrasDeducciones ?? raw.OtrasDeducciones,
+    
     totalDeducciones: raw.totalDeducciones ?? raw.TotalDeducciones ?? 0,
-    salarioNeto: raw.salarioNeto ?? raw.SalarioNeto ?? raw.totalNeto ?? raw.TotalNeto ?? 0,
+    liquidoAPagar: raw.liquidoAPagar ?? raw.LiquidoAPagar ?? raw.salarioNeto ?? raw.SalarioNeto ?? 0,
+    salarioNeto: raw.salarioNeto ?? raw.SalarioNeto ?? raw.liquidoAPagar ?? raw.LiquidoAPagar ?? 0,
+    
+    // Aportes patronales (informativos)
+    igssPatronal: raw.igssPatronal ?? raw.IgssPatronal,
+    irtra: raw.irtra ?? raw.Irtra,
+    intecap: raw.intecap ?? raw.Intecap,
+    
+    // Conceptos y ajustes (opcionales)
     conceptos: Array.isArray(raw.conceptos ?? raw.Conceptos) 
       ? (raw.conceptos ?? raw.Conceptos).map(mapConcept)
-      : [],
+      : undefined,
     ajustes: Array.isArray(raw.ajustes ?? raw.Ajustes)
       ? (raw.ajustes ?? raw.Ajustes).map(mapAdjustment)
-      : []
+      : undefined
   }
 }
 
