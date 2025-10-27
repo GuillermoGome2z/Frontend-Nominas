@@ -74,19 +74,12 @@ export async function getKpis(): Promise<Kpis> {
         const departamentosMap = new Map<string, number>()
         
         empleados.forEach((emp: any) => {
-          // Debug: ver la estructura del empleado
-          if (import.meta.env?.DEV) {
-            console.log('Empleado estructura:', emp)
-          }
-          
-          const deptName = emp.departamento?.nombre ?? 
+          const deptName = emp.nombreDepartamento ?? 
+                          emp.NombreDepartamento ?? 
+                          emp.departamento?.nombre ?? 
                           emp.departamento?.Nombre ?? 
                           emp.Departamento?.nombre ?? 
                           emp.Departamento?.Nombre ?? 
-                          emp.departamentoNombre ?? 
-                          emp.DepartamentoNombre ?? 
-                          emp.departamento ?? 
-                          emp.Departamento ?? 
                           'Sin Departamento'
           
           departamentosMap.set(deptName, (departamentosMap.get(deptName) || 0) + 1)
