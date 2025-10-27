@@ -25,6 +25,7 @@ export default function PayrollGenerationModal({
 }: PayrollGenerationModalProps) {
   const { success, error } = useToast()
   const [step, setStep] = useState<'config' | 'preview' | 'generating'>('config')
+  const [hasConflict, setHasConflict] = useState(false)
   
   // Form data
   const [formData, setFormData] = useState<NominaCreateDTO>({
@@ -78,14 +79,22 @@ export default function PayrollGenerationModal({
   const handleGenerateNomina = async () => {
     try {
       setStep('generating')
+      setHasConflict(false)
       await createNomina.mutateAsync(formData)
       success('Nómina generada correctamente')
       onSuccess()
       onClose()
     } catch (e: any) {
-      const msg = e?.response?.data?.message ?? e?.message ?? 'Error al generar la nómina'
-      error(msg)
-      setStep('preview')
+      // Manejo específico para conflictos (409)
+      if (e?.response?.status === 409) {
+        setHasConflict(true)
+        error('⚠️ Ya existe una nómina para este periodo. Por favor, elimina la nómina existente o elige otro periodo.')
+        setStep('config')
+      } else {
+        const msg = e?.response?.data?.message ?? e?.message ?? 'Error al generar la nómina'
+        error(msg)
+        setStep('preview')
+      }
     }
   }
 
@@ -171,6 +180,28 @@ export default function PayrollGenerationModal({
           <div className="max-h-96 overflow-y-auto">
             {step === 'config' && (
               <div className="p-6 space-y-6">
+                {/* Banner de advertencia de conflicto */}
+                {hasConflict && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">
+                          Nómina Duplicada
+                        </h3>
+                        <div className="mt-1 text-sm text-red-700">
+                          <p>Ya existe una nómina para el periodo <strong>{formData.periodo}</strong> de tipo <strong>{formData.tipoNomina}</strong>.</p>
+                          <p className="mt-1">Por favor, elimina la nómina existente desde la lista principal o selecciona otro periodo/tipo.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Configuración básica */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -181,7 +212,10 @@ export default function PayrollGenerationModal({
                       type="month"
                       id="periodo"
                       value={formData.periodo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, periodo: e.target.value }))}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, periodo: e.target.value }))
+                        setHasConflict(false) // Limpiar advertencia al cambiar periodo
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
                     />
@@ -194,7 +228,10 @@ export default function PayrollGenerationModal({
                     <select
                       id="tipoNomina"
                       value={formData.tipoNomina}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tipoNomina: e.target.value as TipoNomina }))}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, tipoNomina: e.target.value as TipoNomina }))
+                        setHasConflict(false) // Limpiar advertencia al cambiar tipo
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
                     >
