@@ -9,6 +9,7 @@ const formatDate = (dateString: string) => {
 }
 import Loader from '@/components/ui/Loader'
 import CumplimientoLegal from '../components/CumplimientoLegal'
+import { ExportButtons } from '../components/ExportButtons'
 import type { NominaDetalleDTO, EstadoNomina } from '../api'
 
 export default function PayrollDetailPage() {
@@ -165,33 +166,48 @@ export default function PayrollDetailPage() {
         </div>
         
         {/* Acciones */}
-        <div className="flex gap-2">
-          {canApprove && (
-            <button
-              onClick={handleApprove}
-              disabled={aprobarMutation.isPending}
-              className="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-            >
-              {aprobarMutation.isPending ? 'Aprobando...' : 'Aprobar'}
-            </button>
-          )}
-          {canMarkPaid && (
-            <button
-              onClick={handleMarkPaid}
-              disabled={marcarPagadaMutation.isPending}
-              className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {marcarPagadaMutation.isPending ? 'Marcando...' : 'Marcar Pagada'}
-            </button>
-          )}
-          {canCancel && (
-            <button
-              onClick={handleCancel}
-              disabled={anularMutation.isPending}
-              className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-            >
-              {anularMutation.isPending ? 'Anulando...' : 'Anular'}
-            </button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
+            {canApprove && (
+              <button
+                onClick={handleApprove}
+                disabled={aprobarMutation.isPending}
+                className="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                {aprobarMutation.isPending ? 'Aprobando...' : 'Aprobar'}
+              </button>
+            )}
+            {canMarkPaid && (
+              <button
+                onClick={handleMarkPaid}
+                disabled={marcarPagadaMutation.isPending}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {marcarPagadaMutation.isPending ? 'Marcando...' : 'Marcar Pagada'}
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={handleCancel}
+                disabled={anularMutation.isPending}
+                className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {anularMutation.isPending ? 'Anulando...' : 'Anular'}
+              </button>
+            )}
+          </div>
+          
+          {/* Botones de Exportación Múltiple */}
+          {detalleData && detalleData.length > 0 && (
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
+              <span className="text-sm text-gray-500">Exportar:</span>
+              <ExportButtons
+                variant="multiple"
+                nomina={nomina}
+                detalles={detalleData}
+                showLabels={true}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -359,6 +375,9 @@ export default function PayrollDetailPage() {
                         <th className="px-4 py-3 text-right text-xs font-medium text-blue-600 uppercase tracking-wider">
                           Total Neto
                         </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Exportar
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -401,6 +420,14 @@ export default function PayrollDetailPage() {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
                             {formatCurrency(detalle.sueldoNeto)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-center">
+                            <ExportButtons
+                              variant="individual"
+                              nomina={nomina}
+                              detalle={detalle}
+                              showLabels={false}
+                            />
                           </td>
                         </tr>
                       ))}

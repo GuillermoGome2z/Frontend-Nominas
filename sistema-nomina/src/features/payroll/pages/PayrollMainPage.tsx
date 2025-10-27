@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useNominasWithFilters, useNominaStats, useAprobarNomina, useMarcarNominaPagada, useDeleteNomina } from '../hooks'
+import { useNominasWithFilters, useNominaStats, useNominasWithDetalles, useAprobarNomina, useMarcarNominaPagada, useDeleteNomina } from '../hooks'
 import { useToast } from '@/components/ui/Toast'
 import NominasTable from '../components/NominasTable'
 import PayrollFilters from '../components/PayrollFilters'
 import PayrollGenerationModal from '../components/PayrollGenerationModal'
 import { StatCard } from '@/components/ui/StatCard'
+import { ExportPanel } from '../components/ExportButtons'
 import { formatCurrency } from '@/shared/format'
 import type { NominaFilters } from '../api'
 
@@ -30,6 +31,12 @@ export default function PayrollMainPage() {
     data: statsData,
     isLoading: isLoadingStats
   } = useNominaStats()
+  
+  // Hook para obtener nóminas con detalles completos (para exportación)
+  const {
+    data: nominasWithDetalles,
+    isLoading: isLoadingDetalles
+  } = useNominasWithDetalles(nominasData?.data || [])
   
   // Mutations
   const aprobarMutation = useAprobarNomina()
@@ -213,8 +220,17 @@ export default function PayrollMainPage() {
           </div>
         </div>
       </div>
-      
-      {/* Filtros */}
+
+      {/* Panel de Exportación */}  
+      {nominasWithDetalles && nominasWithDetalles.length > 0 && (
+        <div className="mb-6">
+          <ExportPanel
+            nominasData={nominasWithDetalles}
+            totalEmpleados={statsData?.empleadosEnNomina || 0}
+            isLoadingDetalles={isLoadingDetalles}
+          />
+        </div>
+      )}      {/* Filtros */}
       <div className="mb-6">
         <PayrollFilters
           filters={filters}
