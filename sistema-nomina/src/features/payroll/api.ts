@@ -14,10 +14,23 @@ export interface NominaDTO {
   fechaCreacion: string // ISO
   fechaAprobacion?: string // ISO
   fechaPago?: string // ISO
+  
+  // Totales generales
   totalBruto: number
   totalDeducciones: number
   totalNeto: number
   cantidadEmpleados: number
+  
+  // Deducciones desglosadas (NUEVO - Guatemala 2025)
+  totalIgssEmpleado?: number
+  totalIsr?: number
+  
+  // Aportes patronales (NUEVO - Guatemala 2025)
+  totalIgssPatronal?: number
+  totalIrtra?: number
+  totalIntecap?: number
+  
+  // Auditoría
   creadoPor?: string
   aprobadoPor?: string
   observaciones?: string
@@ -133,21 +146,62 @@ function mapNomina(x: any): NominaDTO {
       ? (up(tipoRaw) as TipoNomina)
       : 'ORDINARIA'
 
+  // Construir periodo desde múltiples posibles fuentes
+  let periodo = x.periodo ?? x.Periodo
+  
+  // Si no hay periodo directo, construir desde Año/Mes
+  if (!periodo && x.anio && x.mes) {
+    periodo = `${x.anio}-${String(x.mes).padStart(2, '0')}`
+  }
+  if (!periodo && x.Anio && x.Mes) {
+    periodo = `${x.Anio}-${String(x.Mes).padStart(2, '0')}`
+  }
+  
+  // Si aún no hay periodo, intentar extraer de fechaGeneracion
+  if (!periodo && x.fechaGeneracion) {
+    const fecha = new Date(x.fechaGeneracion)
+    periodo = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`
+  }
+  if (!periodo && x.FechaGeneracion) {
+    const fecha = new Date(x.FechaGeneracion)
+    periodo = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`
+  }
+
+  // Calcular cantidad de empleados desde detalles si existe
+  const cantidadEmpleados = Array.isArray(x.detalles) 
+    ? x.detalles.length 
+    : Array.isArray(x.Detalles)
+    ? x.Detalles.length
+    : Number(x.cantidadEmpleados ?? x.CantidadEmpleados ?? 0)
+
   return {
     id: x.id ?? x.Id ?? 0,
-    periodo: x.periodo ?? x.Periodo ?? '',
+    periodo: periodo ?? '',
     tipoNomina: tipo,
     estado: estado,
-    fechaCreacion: x.fechaCreacion ?? x.FechaCreacion ?? '',
+    fechaCreacion: x.fechaGeneracion ?? x.FechaGeneracion ?? x.fechaCreacion ?? x.FechaCreacion ?? '',
     fechaAprobacion: x.fechaAprobacion ?? x.FechaAprobacion,
     fechaPago: x.fechaPago ?? x.FechaPago,
+    
+    // Totales generales
     totalBruto: Number(x.totalBruto ?? x.TotalBruto ?? 0),
     totalDeducciones: Number(x.totalDeducciones ?? x.TotalDeducciones ?? 0),
     totalNeto: Number(x.totalNeto ?? x.TotalNeto ?? 0),
-    cantidadEmpleados: Number(x.cantidadEmpleados ?? x.CantidadEmpleados ?? 0),
+    cantidadEmpleados: cantidadEmpleados,
+    
+    // Deducciones desglosadas (Guatemala 2025)
+    totalIgssEmpleado: Number(x.totalIgssEmpleado ?? x.TotalIgssEmpleado ?? 0),
+    totalIsr: Number(x.totalIsr ?? x.TotalIsr ?? 0),
+    
+    // Aportes patronales (Guatemala 2025)
+    totalIgssPatronal: Number(x.totalIgssPatronal ?? x.TotalIgssPatronal ?? x.aportesPatronales?.totalIgssPatronal ?? x.AportesPatronales?.TotalIgssPatronal ?? 0),
+    totalIrtra: Number(x.totalIrtra ?? x.TotalIrtra ?? x.aportesPatronales?.totalIrtra ?? x.AportesPatronales?.TotalIrtra ?? 0),
+    totalIntecap: Number(x.totalIntecap ?? x.TotalIntecap ?? x.aportesPatronales?.totalIntecap ?? x.AportesPatronales?.TotalIntecap ?? 0),
+    
+    // Auditoría
     creadoPor: x.creadoPor ?? x.CreadoPor,
     aprobadoPor: x.aprobadoPor ?? x.AprobadoPor,
-    observaciones: x.observaciones ?? x.Observaciones
+    observaciones: x.observaciones ?? x.Observaciones ?? x.descripcion ?? x.Descripcion
   }
 }
 

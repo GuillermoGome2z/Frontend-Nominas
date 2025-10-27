@@ -33,23 +33,14 @@ const formatCurrency = (value: number) =>
     currency: 'GTQ',
   }).format(value)
 
-const formatPeriodo = (periodo: string) => {
-  // "2025-01" => "Enero 2025"
+const formatPeriodo = (periodo: string | undefined | null) => {
+  if (!periodo) return 'Sin periodo'
+  
   const [año, mes] = periodo.split('-')
-  const meses = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ]
+  if (!año || !mes) return periodo
+  
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const mesNombre = meses[parseInt(mes) - 1] || mes
   return `${mesNombre} ${año}`
 }
@@ -82,11 +73,23 @@ export default function NominasTable({
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Estado
             </th>
-            <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th className="px-4 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Empleados
             </th>
-            <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-              Total Neto
+            <th className="px-4 py-4 text-right text-xs font-semibold text-green-600 uppercase tracking-wider">
+              Salario Bruto
+            </th>
+            <th className="px-3 py-4 text-right text-xs font-semibold text-red-600 uppercase tracking-wider">
+              IGSS
+            </th>
+            <th className="px-3 py-4 text-right text-xs font-semibold text-red-600 uppercase tracking-wider">
+              ISR
+            </th>
+            <th className="px-3 py-4 text-right text-xs font-semibold text-red-600 uppercase tracking-wider">
+              Otras Deduc.
+            </th>
+            <th className="px-4 py-4 text-right text-xs font-semibold text-blue-700 uppercase tracking-wider">
+              Neto a Pagar
             </th>
             <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Acciones
@@ -94,35 +97,57 @@ export default function NominasTable({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
-          {rows.map((nomina) => (
-            <tr key={nomina.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                  {formatPeriodo(nomina.periodo)}
-                </div>
-                <div className="text-xs text-gray-500">
-                  ID: {nomina.id}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-700">
-                  {nomina.tipoNomina}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <StatusPill estado={nomina.estado} />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right">
-                <span className="text-sm text-gray-900">
-                  {nomina.cantidadEmpleados}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right">
-                <span className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(nomina.totalNeto)}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          {rows.map((nomina) => {
+            // Calcular otras deducciones (lo que no es IGSS ni ISR)
+            const igss = nomina.totalIgssEmpleado || 0
+            const isr = nomina.totalIsr || 0
+            const otrasDeducciones = nomina.totalDeducciones - igss - isr
+
+            return (
+              <tr key={nomina.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    {nomina.periodo ? formatPeriodo(nomina.periodo) : 'Sin periodo'}
+                  </div>
+                  <div className="text-xs text-gray-500">ID: {nomina.id}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="text-sm text-gray-700">{nomina.tipoNomina}</span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StatusPill estado={nomina.estado} />
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-right">
+                  <span className="text-sm font-medium text-gray-900">
+                    {nomina.cantidadEmpleados}
+                  </span>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-right">
+                  <span className="text-sm font-semibold text-green-600">
+                    {formatCurrency(nomina.totalBruto)}
+                  </span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap text-right">
+                  <span className="text-xs font-medium text-red-600">
+                    {formatCurrency(igss)}
+                  </span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap text-right">
+                  <span className="text-xs font-medium text-red-600">
+                    {formatCurrency(isr)}
+                  </span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap text-right">
+                  <span className="text-xs font-medium text-red-600">
+                    {formatCurrency(otrasDeducciones)}
+                  </span>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-right">
+                  <span className="text-sm font-bold text-blue-700">
+                    {formatCurrency(nomina.totalNeto)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end gap-2">
                   <Link
                     to={`/nomina/${nomina.id}`}
@@ -152,13 +177,7 @@ export default function NominasTable({
                   {nomina.estado === 'BORRADOR' && onDelete && (
                     <button
                       onClick={() => {
-                        if (
-                          confirm(
-                            `¿Estás seguro de eliminar la nómina de ${formatPeriodo(
-                              nomina.periodo
-                            )}?`
-                          )
-                        ) {
+                        if (confirm(`¿Estás seguro de eliminar la nómina de ${formatPeriodo(nomina.periodo)}?`)) {
                           onDelete(nomina.id)
                         }
                       }}
@@ -170,7 +189,8 @@ export default function NominasTable({
                 </div>
               </td>
             </tr>
-          ))}
+          )
+          })}
         </tbody>
       </table>
     </div>
