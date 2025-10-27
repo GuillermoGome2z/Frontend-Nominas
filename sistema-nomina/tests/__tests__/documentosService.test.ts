@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { documentosService } from '../services/documentosService'
+import { documentosService } from '../../src/services/documentosService'
+import { api } from '../../src/lib/http'
+
+vi.mock('../../src/lib/http')
 
 describe('documentosService', () => {
   describe('validateFileSize', () => {

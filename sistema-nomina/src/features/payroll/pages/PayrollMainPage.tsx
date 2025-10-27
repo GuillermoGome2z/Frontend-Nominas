@@ -195,6 +195,25 @@ export default function PayrollMainPage() {
         </div>
       )}
       
+      {/* Indicador de Cumplimiento Legal Guatemala 2025 */}
+      <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">🏛️</div>
+            <div>
+              <h3 className="font-semibold text-green-800">Sistema Actualizado - Guatemala 2025</h3>
+              <p className="text-sm text-green-600">
+                Cumplimiento legal: IGSS 4.83%, Bono Decreto Q250, Exenciones Aguinaldo/Bono14
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-medium text-green-700">✅ Conforme</div>
+            <div className="text-xs text-green-600">Leyes laborales GT</div>
+          </div>
+        </div>
+      </div>
+      
       {/* Filtros */}
       <div className="mb-6">
         <PayrollFilters

@@ -36,31 +36,46 @@ export interface NominaDTO {
   observaciones?: string
 }
 
-// DTO para detalle de empleado en nómina
+// DTO para detalle de empleado en nómina - Actualizado Guatemala 2025
 export interface NominaDetalleDTO {
   id: number
   nominaId: number
   empleadoId: number
   nombreCompleto: string
+  nombreEmpleado: string // Nuevo campo del backend
   departamento: string
+  nombreDepartamento: string // Nuevo campo del backend
   puesto: string
+  nombrePuesto: string // Nuevo campo del backend
   diasTrabajados: number
   horasOrdinarias: number
   horasExtra50: number
   horasExtra100: number
   salarioBase: number
+  salarioBruto: number // Campo principal del backend
   bonificaciones: number
+  bonoDecreto: number // Separado del total de bonificaciones
   comisiones: number
   horasExtraValor: number
   totalDevengado: number
+  
+  // Deducciones detalladas (nuevos campos backend)
   igss: number
   isr: number
   prestamos: number
   anticipos: number
-  otrosDeducciones: number
+  otrasDeducciones: number // Renombrado para consistencia
+  otrosDeducciones: number // Mantener compatibilidad
+  
   totalDeducciones: number
   sueldoNeto: number
+  salarioNeto: number // Campo alternativo del backend
   observaciones?: string
+  
+  // Campos adicionales para debugging/auditoría
+  esPromedioAnual?: boolean // Indica si usa promedio 12 meses
+  baseIgssCalculada?: number // Base real usada para IGSS
+  exencionAplicada?: string // Tipo de exención aplicada
 }
 
 // DTO para crear nueva nómina
@@ -206,35 +221,51 @@ function mapNomina(x: any): NominaDTO {
 }
 
 function mapNominaDetalle(x: any): NominaDetalleDTO {
-
-
   return {
-    id: x.id ?? x.Id ?? 0,
-    nominaId: x.nominaId ?? x.NominaId ?? 0,
-    empleadoId: x.empleadoId ?? x.EmpleadoId ?? 0,
-    nombreCompleto: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '', // ← Usar nombreEmpleado
-    departamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '', // ← Usar nombreDepartamento
-    puesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '', // ← Usar nombrePuesto
+    id: Number(x.id ?? x.Id ?? 0),
+    nominaId: Number(x.nominaId ?? x.NominaId ?? 0),
+    empleadoId: Number(x.empleadoId ?? x.EmpleadoId ?? 0),
+    
+    // Nombres (compatibilidad con nuevos campos backend)
+    nombreCompleto: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '',
+    nombreEmpleado: x.nombreEmpleado ?? x.NombreEmpleado ?? x.nombreCompleto ?? x.NombreCompleto ?? '',
+    departamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '',
+    nombreDepartamento: x.nombreDepartamento ?? x.NombreDepartamento ?? x.departamento ?? x.Departamento ?? '',
+    puesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '',
+    nombrePuesto: x.nombrePuesto ?? x.NombrePuesto ?? x.puesto ?? x.Puesto ?? '',
+    
+    // Tiempo y horas
     diasTrabajados: Number(x.diasTrabajados ?? x.DiasTrabajados ?? x.dias ?? x.Dias ?? 30),
     horasOrdinarias: Number(x.horasOrdinarias ?? x.HorasOrdinarias ?? 0),
     horasExtra50: Number(x.horasExtra50 ?? x.HorasExtra50 ?? 0),
     horasExtra100: Number(x.horasExtra100 ?? x.HorasExtra100 ?? 0),
-    salarioBase: Number(x.salarioBruto ?? x.SalarioBruto ?? 0), // ← Usar salarioBruto del backend
-    bonificaciones: Number(x.bonificaciones ?? x.Bonificaciones ?? 250), // Bono Decreto Guatemala
+    
+    // Salarios (usando nuevos campos del backend Guatemala 2025)
+    salarioBase: Number(x.salarioBase ?? x.SalarioBase ?? x.salarioBruto ?? x.SalarioBruto ?? 0),
+    salarioBruto: Number(x.salarioBruto ?? x.SalarioBruto ?? x.salarioBase ?? x.SalarioBase ?? 0),
+    bonificaciones: Number(x.bonificaciones ?? x.Bonificaciones ?? 0),
+    bonoDecreto: Number(x.bonoDecreto ?? x.BonoDecreto ?? 0), // Separado en nueva implementación
     comisiones: Number(x.comisiones ?? x.Comisiones ?? 0),
     horasExtraValor: Number(x.horasExtraValor ?? x.HorasExtraValor ?? 0),
-    totalDevengado: Number(x.salarioBruto ?? x.SalarioBruto ?? 0), // ← Total bruto
+    totalDevengado: Number(x.totalDevengado ?? x.TotalDevengado ?? x.salarioBruto ?? x.SalarioBruto ?? 0),
     
-    // Deducciones específicas - usar campos del backend
-    igss: Number(x.igss ?? x.Igss ?? 0), // IGSS desde backend
-    isr: Number(x.isr ?? x.Isr ?? 0), // ISR desde backend
-    prestamos: Number(x.prestamos ?? x.Prestamos ?? 0), // Préstamos desde backend
-    anticipos: Number(x.anticipos ?? x.Anticipos ?? 0), // Anticipos desde backend
-    otrosDeducciones: Number(x.otrasDeducciones ?? x.OtrasDeducciones ?? x.otrosDeducciones ?? 0), // Otras deducciones
+    // Deducciones detalladas (nuevos campos backend Guatemala 2025)
+    igss: Number(x.igss ?? x.Igss ?? 0),
+    isr: Number(x.isr ?? x.Isr ?? 0),
+    prestamos: Number(x.prestamos ?? x.Prestamos ?? 0),
+    anticipos: Number(x.anticipos ?? x.Anticipos ?? 0),
+    otrasDeducciones: Number(x.otrasDeducciones ?? x.OtrasDeducciones ?? 0),
+    otrosDeducciones: Number(x.otrosDeducciones ?? x.OtrosDeducciones ?? x.otrasDeducciones ?? x.OtrasDeducciones ?? 0),
     
-    totalDeducciones: Number(x.deducciones ?? x.Deducciones ?? 0), // ← Usar deducciones del backend
-    sueldoNeto: Number(x.salarioNeto ?? x.SalarioNeto ?? 0), // ← Usar salarioNeto del backend
-    observaciones: x.observaciones ?? x.Observaciones
+    totalDeducciones: Number(x.totalDeducciones ?? x.TotalDeducciones ?? x.deducciones ?? x.Deducciones ?? 0),
+    sueldoNeto: Number(x.sueldoNeto ?? x.SueldoNeto ?? x.salarioNeto ?? x.SalarioNeto ?? 0),
+    salarioNeto: Number(x.salarioNeto ?? x.SalarioNeto ?? x.sueldoNeto ?? x.SueldoNeto ?? 0),
+    
+    // Campos adicionales para auditoría
+    observaciones: x.observaciones ?? x.Observaciones,
+    esPromedioAnual: x.esPromedioAnual ?? x.EsPromedioAnual ?? false,
+    baseIgssCalculada: Number(x.baseIgssCalculada ?? x.BaseIgssCalculada ?? 0),
+    exencionAplicada: x.exencionAplicada ?? x.ExencionAplicada ?? ''
   }
 }
 

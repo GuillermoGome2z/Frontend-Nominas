@@ -281,7 +281,7 @@ export function getEstadoNominaColor(estado: string): string {
   }
 }
 
-// Función helper para obtener color del tipo de nómina
+// Función helper para obtener color del tipo de nómina con indicadores Guatemala 2025
 export function getTipoNominaColor(tipo: string): string {
   switch (tipo.toUpperCase()) {
     case 'ORDINARIA':
@@ -289,10 +289,29 @@ export function getTipoNominaColor(tipo: string): string {
     case 'EXTRAORDINARIA':
       return 'bg-purple-100 text-purple-700 border-purple-200'
     case 'AGUINALDO':
-      return 'bg-green-100 text-green-700 border-green-200'
+      return 'bg-green-100 text-green-700 border-green-200' // IGSS e ISR exentos
     case 'BONO14':
-      return 'bg-orange-100 text-orange-700 border-orange-200'
+      return 'bg-orange-100 text-orange-700 border-orange-200' // IGSS e ISR exentos
     default:
       return 'bg-gray-100 text-gray-700 border-gray-200'
   }
 }
+
+// Función helper para obtener descripción de exenciones
+export function getExencionesDescription(tipo: string): string {
+  switch (tipo.toUpperCase()) {
+    case 'AGUINALDO':
+      return 'Sin IGSS, ISR exento < Q60K anuales, Promedio 12 meses'
+    case 'BONO14':
+      return 'Sin IGSS, ISR exento < Q60K anuales, Promedio 12 meses'
+    case 'ORDINARIA':
+      return 'IGSS 4.83%, ISR escala progresiva, Bono Decreto Q250'
+    case 'EXTRAORDINARIA':
+      return 'IGSS 4.83%, ISR escala progresiva, Sin bono decreto'
+    default:
+      return 'Reglas estándar Guatemala 2025'
+  }
+}
+
+// Re-exportar hooks de validación
+export { useValidacionCumplimiento, useEstadisticasCumplimiento } from './hooks/useValidacionCumplimiento'
