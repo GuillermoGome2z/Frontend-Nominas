@@ -68,6 +68,15 @@ export function useExpedienteStats() {
     queryKey: ['expedientes', 'stats'],
     queryFn: getExpedienteStats,
     staleTime: 5 * 60 * 1000, // 5 minutos
+    retry: (failureCount, error: any) => {
+      // No reintentar para errores 500 o 404 (endpoints no implementados)
+      if (error?.response?.status === 500 || error?.response?.status === 404) {
+        return false
+      }
+      // Reintentar máximo 2 veces para otros errores
+      return failureCount < 2
+    },
+    refetchOnWindowFocus: false, // No refetch automático
   })
 }
 
