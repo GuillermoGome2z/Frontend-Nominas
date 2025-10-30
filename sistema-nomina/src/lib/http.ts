@@ -15,7 +15,11 @@ function computeBaseURL() {
 // Cliente Axios
 export const api = axios.create({
   baseURL: computeBaseURL(),
-  // timeout: 15000,
+  timeout: 30000, // 30 segundos para producción
+  withCredentials: false, // No necesario para JWT en headers
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 // ===================== REFRESH TOKEN LOGIC =====================
