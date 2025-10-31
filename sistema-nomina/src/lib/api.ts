@@ -34,14 +34,7 @@ function computeBaseURL() {
   return "/api";
 }
 
-export const api = axios.create({ 
-  baseURL: computeBaseURL(),
-  timeout: 30000, // 30 segundos para producción
-  withCredentials: false, // No necesario para JWT en headers
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export const api = axios.create({ baseURL: computeBaseURL() });
 
 // ===================== REQUEST =====================
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {

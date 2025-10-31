@@ -13,8 +13,6 @@ function createAuthClient(): AxiosInstance {
   const baseURL = import.meta.env.VITE_API_URL || '/api'
   return axios.create({
     baseURL: baseURL.replace(/\/+$/, ''),
-    timeout: 30000, // 30 segundos para producción
-    withCredentials: false, // No necesario para JWT en headers
     headers: {
       'Content-Type': 'application/json',
     },
