@@ -17,6 +17,13 @@
 
 ---
 
+
+## 📘 Documentación Técnica
+
+✅ **Manual Técnico del Frontend**  
+[📄 Ver manual técnico completo](docs/manual-tecnico-frontend.md)
+
+
 ## 📋 Descripción
 
 Sistema web moderno y completo para la gestión de nóminas empresariales, desarrollado específicamente para cumplir con **todas las regulaciones laborales de Guatemala 2025**. Incluye cálculos automáticos de IGSS, ISR, Aguinaldo, Bono 14, y todas las deducciones según la legislación vigente.
@@ -317,4 +324,5 @@ Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detal
 *Sistema de Nóminas - Cumplimiento Legal Guatemala 2025*
 
 </div>
+
 
