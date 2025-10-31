@@ -21,7 +21,7 @@
 ## 📘 Documentación Técnica
 
 ✅ **Manual Técnico del Frontend**  
-[📄 Ver manual técnico completo](docs/manual-tecnico-frontend.md)
+📄 [Ver manual técnico completo](docs/manual-tecnico-frontend.md)
 
 
 ## 📋 Descripción
@@ -324,5 +324,6 @@ Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detal
 *Sistema de Nóminas - Cumplimiento Legal Guatemala 2025*
 
 </div>
+
 
 
