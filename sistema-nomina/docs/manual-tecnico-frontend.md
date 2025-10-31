@@ -1,284 +1,96 @@
-UNIVERSIDAD MARIANO GALVEZ DE GUATEMALA
+# UNIVERSIDAD MARIANO GÁLVEZ DE GUATEMALA  
+## CENTRO UNIVERSITARIO CHIQUIMULILLA, SANTA ROSA  
+### FACULTAD DE INGENIERÍA EN SISTEMAS
+
+**Curso:** Desarrollo Web  
+**Catedrático:** Ng. Carmelo Estuardo Mayén Monterroso  
+
+**Proyecto Final**  
+# MANUAL TÉCNICO DEL FRONTEND – SISTEMA DE GESTIÓN DE NÓMINA
+
+**Estudiantes:**  
+- Guillermo José Gómez Aguilera  
+- Teddy Leonardo Hernández Pérez  
+- Wilson Eduardo Hernández López  
+- Gelen Dayanna López Morales  
+
+---
+
+## ÍNDICE
+1. [Introducción](#introducción)  
+   1.1 [Objetivo del Manual](#objetivo-del-manual) • 1.2 [Alcance](#alcance) • 1.3 [Público Objetivo](#público-objetivo)  
+2. [Descripción general del sistema](#descripción-general-del-sistema)  
+   2.1 [Propósito](#propósito-del-sistema) • 2.2 [Cumplimiento legal Guatemala 2025](#cumplimiento-legal-guatemala-2025) • 2.3 [Tecnologías](#tecnologías-utilizadas)  
+3. [Arquitectura del frontend](#arquitectura-del-frontend)  
+   3.1 [Estructura de carpetas](#estructura-de-carpetas-y-archivos) • 3.2 [Componentes](#componentes-principales) • 3.3 [Hooks](#hooks-personalizados) • 3.4 [Integración con backend](#integración-con-backend)  
+4. [Instalación y configuración](#instalación-y-configuración)  
+5. [Scripts disponibles](#scripts-disponibles)  
+6. [Funcionalidades del sistema](#funcionalidades-del-sistema)  
+7. [Validaciones legales y cálculos](#validaciones-legales-y-cálculos-automáticos)  
+8. [Componentes y hooks destacados](#componentes-y-hooks-destacados)  
+9. [Testing y verificación](#testing-y-verificación)  
+10. [Endpoints consumidos](#endpoints-consumidos)  
+11. [Buenas prácticas y recomendaciones](#buenas-prácticas-y-recomendaciones)  
+12. [Contribución y mantenimiento](#contribución-y-mantenimiento)  
+13. [Cierre](#cierre)
+
+---
+
+## Introducción
+### Objetivo del Manual
+Este manual técnico documenta la **estructura, configuración, funcionalidades y componentes** del frontend del Sistema de Nóminas (React + TypeScript). Está orientado a **desarrolladores, QA y personal técnico**.
+
+### Alcance
+Cubre exclusivamente el **frontend** y su interacción con la **API REST (ASP.NET Core)**, con foco en el **cumplimiento legal Guatemala 2025**.
+
+### Público Objetivo
+- Desarrolladores frontend  
+- Equipos de QA  
+- Soporte técnico / implementación  
+- Docentes y evaluadores
+
+---
+
+## Descripción general del sistema
+### Propósito del sistema
+Automatizar y validar procesos de nómina conforme a la legislación guatemalteca: **IGSS, ISR, salario mínimo, Aguinaldo, Bono 14**, etc., con enfoque en **trazabilidad, seguridad y transparencia**.
+
+### Cumplimiento legal Guatemala 2025
+- Cálculo automático de **IGSS** e **ISR** (tablas vigentes)  
+- Verificación de **salario mínimo** por sector  
+- Reglas para **Aguinaldo** y **Bono 14** (proporcionalidad y exenciones)  
+- Alertas visuales ante **incumplimientos**
+
+### Tecnologías utilizadas
+**React 18, TypeScript 5, Vite 7, Tailwind CSS, React Hook Form + Zod, React Query, Axios.**  
+(Soporte de diseño: Canva/Figma opcional.)
+
+---
+
+## Arquitectura del frontend
+### Estructura de carpetas y archivos
 
-CENTRO UNIVERSITARIO CHIQUIMULILLA, SANTA ROSA
-
-FACULTAD DE INGENIERIA EN SISTEMAS
-
- 
-
-CURSO: DESARROLLO WEB
-
-CATEDRÁTICO: NG. CARMELO ESTUARDO MAYÉN MONTERROSO
-
-PROYECTO FINAL
-
-MANUAL TECNICO DE GESTION DE NOMINA
-
- 
-
-Universidad Mariano Gálvez de Guatemala
-
- 
-
- 
-
- 
-
- 
-
- 
-
-ESTUDIANTES: Guillermo José Gómez Aguilera
-
-                              Teddy Leonardo Hernández Pérez
-
-                              Wilson Eduardo Hernández López
-
-                        Gelen Dayanna López Morales
-
- 
-
- 
-
- 
-
- 
-
-INDICE
-
-1. Introducción
-
-1.1 Objetivo del Manual
-
-1.2 Alcance
-
-1.3 Público Objetivo
-
-2. Descripción general del sistema
-
-2.1 Propósito del sistema
-
-2.2 Cumplimiento legal Guatemala 2025
-
-2.3 Tecnologías utilizadas
-
-3. Arquitectura del frontend
-
-3.1 Estructura de carpetas y archivos
-
-3.2 Componentes principales
-
-3.3 Hooks personalizados
-
-3.4 Integración con backend
-
-4. Instalación y configuración
-
-4.1 Prerrequisitos
-
-4.2 Clonado del repositorio
-
-4.3 Instalación de dependencias
-
-4.4 Configuración del entorno (.env)
-
-4.5 Ejecución del entorno de desarrollo
-
-5. Scripts disponibles
-
-5.1 npm run dev
-
-5.2 npm run build
-
-5.3 npm run preview
-
-5.4 npm run lint
-
-5.5 npm run format
-
-6. Funcionalidades del sistema
-
-6.1 Gestión de empleados
-
-6.2 Gestión de departamentos
-
-6.3 Nóminas ordinarias
-
-6.4 Nóminas extraordinarias
-
-6.5 Dashboard y reportes
-
-6.6 Seguridad y roles
-
-7. Validaciones legales y cálculos automáticos
-
-7.1 Validación de salario mínimo
-
-7.2 Cálculo de IGSS
-
-7.3 Cálculo de ISR
-
-7.4 Aguinaldo y bono 14
-
-7.5 Validación de antigüedad
-
-7.6 Verificadores y herramientas de prueba
-
-8. Componentes y hooks destacados
-
-8.1 Componentes clave
-
-CumplimientoLegal.tsx
-
-CalculadoraNomina.tsx
-
-FormularioEmpleado.tsx
-
-TablaEmpleados.tsx
-
-Dashboard.tsx
-
-8.2 Hooks personalizados
-
-useValidacionCumplimiento.ts
-
-useCalculoNominaVerificacion.ts
-
-useEmpleado.ts
-
-useDepartamento.ts
-
-9. Testing y verificación
-
-9.1 Validaciones en tiempo real
-
-9.2 Simuladores internos
-
-9.3 Herramientas de desarrollo
-
-9.4 Pruebas manuales
-
-10. Endpoints consumidos
-
-10.1 Configuración base
-
-10.2 Endpoints principales
-
-10.3 Ejemplo de consumo
-
-11. Buenas prácticas y recomendaciones
-
-11.1 Organización del código
-
-11.2 Validaciones estrictas
-
-11.3 Manejo de datos eficiente
-
-11.4 Estilos coherentes
-
-11.5 Seguridad y control de acceso
-
-11.6 Flujo de trabajo con Git
-
-12. Contribución y mantenimiento
-
-12.1 Cómo colaborar
-
-12.2 Flujo de trabajo recomendado
-
-12.3 Mantenimiento del sistema
-
-15. Cierre
-
- 
-
- 
-
-
- 
-
-1. Introducción
-1.1 Objetivo del Manual
-Este manual técnico tiene como objetivo documentar de forma detallada y profesional la estructura, configuración, funcionalidades y componentes clave del frontend del sistema de nóminas desarrollado con React y TypeScript. Está orientado a desarrolladores, técnicos y personal de mantenimiento que requieran comprender, modificar o escalar el sistema.
-
-1.2 Alcance
-El manual cubre exclusivamente el módulo frontend del sistema de nóminas, el cual se comunica con una API REST desarrollada en ASP.NET Core. Se documentan las tecnologías utilizadas, la arquitectura del proyecto, los componentes clave, la configuración del entorno de desarrollo, y las funcionalidades implementadas para cumplir con la legislación laboral vigente en Guatemala en el año 2025.
-
-1.3 Público Objetivo
-Este documento está dirigido a:
-
-Desarrolladores frontend que deseen mantener o extender el sistema.
-Equipos de QA encargados de pruebas funcionales y de interfaz.
-Personal técnico de soporte o implementación.
-Docentes y evaluadores del proyecto universitario.
- 
-
-2. Descripción general del sistema
-2.1 Propósito del sistema
-El sistema de nóminas desarrollado en este proyecto tiene como propósito principal automatizar, validar y gestionar de forma integral todos los procesos relacionados con la administración de nóminas en instituciones guatemaltecas, cumpliendo rigurosamente con la legislación laboral vigente en el país para el año 2025. Este frontend actúa como la interfaz visual y funcional que permite a los usuarios interactuar con el sistema, realizar cálculos complejos, verificar cumplimiento legal, generar reportes y administrar empleados, departamentos y pagos extraordinarios.
-
-El sistema no solo busca eficiencia operativa, sino también transparencia, trazabilidad y seguridad en el manejo de datos sensibles. Cada módulo ha sido diseñado para reflejar las necesidades reales de empresas guatemaltecas, incluyendo el cálculo automático de IGSS, ISR, aguinaldo, bono 14, salario mínimo, y otros componentes legales que afectan directamente la nómina de los trabajadores.
-
- 
-
- 
-
-2.2 Cumplimiento legal Guatemala 2025
-Una de las características más destacadas del sistema es su enfoque en el cumplimiento legal. El frontend incorpora validadores y calculadoras que se actualizan conforme a las disposiciones del Ministerio de Trabajo y Previsión Social de Guatemala, incluyendo:
-
-Cálculo automático de deducciones de IGSS e ISR según tablas oficiales.
-Verificación del cumplimiento del salario mínimo vigente por sector económico.
-Validación de antigüedad para el cálculo proporcional de aguinaldo y bono 14.
-Generación de nóminas ordinarias, extraordinarias y especiales con respaldo legal.
-Alertas visuales y mensajes de error en caso de incumplimiento normativo.
-Este enfoque garantiza que cada nómina generada desde el sistema esté respaldada por la ley, reduciendo riesgos legales y fortaleciendo la confianza institucional.
-
-2.3 Tecnologías utilizadas
-El frontend ha sido construido con un stack moderno, robusto y altamente escalable. Las tecnologías utilizadas incluyen:
-
-React: Biblioteca principal para la construcción de interfaces reactivas y modulares.
-TypeScript: Lenguaje tipado que permite mayor seguridad, claridad y mantenibilidad del código.
-Vite: Herramienta de construcción ultrarrápida que optimiza el desarrollo y el rendimiento.
-Tailwind CSS: Framework de estilos utilitarios que permite una personalización visual precisa y coherente.
-React Hook Form + Zod: Para validaciones de formularios con tipado estricto y retroalimentación inmediata.
-React Query: Para manejo eficiente de datos asincrónicos, caché y sincronización con el backend.
-Axios: Cliente HTTP para consumir endpoints REST de forma segura y estructurada.
-Canva y Figma (opcional): Para diseño visual de componentes y documentación gráfica.
-Este stack permite una experiencia de usuario fluida, validaciones en tiempo real, y una arquitectura limpia que facilita el mantenimiento y la escalabilidad del sistema.
-
-3. Arquitectura del frontend
-3.1 Estructura de carpetas y archivos
-El proyecto está organizado siguiendo buenas prácticas de desarrollo frontend profesional. La estructura base incluye:
 
 Frontend-Nominas/
-
+└── sistema-nomina/
 ├── public/
-
 ├── src/
-
-│   ├── assets/
-
-│   ├── components/
-
-│   ├── hooks/
-
-│   ├── pages/
-
-│   ├── services/
-
-│   ├── utils/
-
-│   ├── App.tsx
-
-│   ├── main.tsx
-
+│ ├── assets/ # recursos
+│ ├── components/ # reutilizables
+│ ├── hooks/ # lógica de negocio (validaciones/cálculos)
+│ ├── pages/ # vistas (Dashboard, Empleados, Nóminas, etc.)
+│ ├── services/ # Axios / API
+│ ├── utils/ # helpers y formatos
+│ ├── App.tsx
+│ └── main.tsx
+├── docs/
+│ ├── manual-tecnico-frontend.md
+│ ├── manuales/manual-tecnico-frontend.pdf
+│ └── CALCULO_NOMINAS_GUATEMALA_2025.md
 ├── .env
-
 ├── package.json
-
 ├── tsconfig.json
-
-├── vite.config.ts
+└── vite.config.ts
 
 assets/: Contiene imágenes, íconos y recursos visuales utilizados en la interfaz.
 components/: Componentes reutilizables como formularios, tablas, botones, modales, etc.
@@ -290,60 +102,30 @@ utils/: Funciones auxiliares para cálculos, formatos y validaciones.
 
  
 
-3.2 Componentes principales
-Entre los componentes más relevantes se encuentran:
 
-CumplimientoLegal.tsx: Verifica si los datos ingresados cumplen con la legislación guatemalteca.
-CalculadoraNomina.tsx: Realiza cálculos automáticos de deducciones, bonificaciones y salario neto.
-TablaEmpleados.tsx: Muestra una tabla interactiva con filtros, paginación y acciones CRUD.
-FormularioEmpleado.tsx: Permite registrar y editar empleados con validaciones estrictas.
-Dashboard.tsx: Panel principal con indicadores clave, gráficas y accesos rápidos.
-Cada componente está diseñado para ser reutilizable, modular y fácil de mantener.
+### Componentes principales
+- **CumplimientoLegal.tsx** – Reglas legales en tiempo real  
+- **CalculadoraNomina.tsx** – IGSS, ISR, neto, Aguinaldo, Bono 14  
+- **TablaEmpleados.tsx** – Listado con filtros y CRUD  
+- **FormularioEmpleado.tsx** – RHF + Zod, validaciones estrictas  
+- **Dashboard.tsx** – KPIs y gráficas
 
-3.3 Hooks personalizados
-El sistema incluye hooks altamente especializados como:
+### Hooks personalizados
+- **useValidacionCumplimiento.ts** – salario mínimo, antigüedad, deducciones  
+- **useCalculoNominaVerificacion.ts** – neto, IGSS, ISR, prestaciones  
+- **useEmpleado.ts / useDepartamento.ts** – estado y servicios por módulo
 
-useValidacionCumplimiento.ts: Evalúa si los datos ingresados cumplen con salario mínimo, antigüedad, y deducciones legales.
-useCalculoNominaVerificacion.ts: Calcula automáticamente el salario neto, deducciones, bonificaciones y verifica que todo esté conforme a ley.
-useDepartamento.ts: Maneja la lógica de creación, edición y eliminación de departamentos.
-useEmpleado.ts: Administra el estado y lógica de los empleados registrados.
-Estos hooks encapsulan la lógica de negocio, separando responsabilidades y facilitando la escalabilidad del sistema.
+### Integración con backend
+API **ASP.NET Core**, cliente **Axios** centralizado, auth **JWT**, endpoints de **empleados**, **departamentos**, **nóminas**, **validaciones** y **reportes**.
 
-3.4 Integración con backend
-El frontend se comunica con una API REST desarrollada en ASP.NET Core. La integración se realiza mediante Axios, con configuración centralizada en services/api.ts. Se consumen endpoints para:
+---
 
-Autenticación y autorización con JWT.
-CRUD de empleados, departamentos y nóminas.
-Validación de datos legales.
-Generación de reportes y exportación de nóminas.
-La comunicación es segura, eficiente y estructurada, permitiendo una sincronización fluida entre frontend y backend.
+## Instalación y configuración
+**Prerrequisitos:** Node 18+, npm/yarn, VS Code (Extensiones: ESLint, Prettier, Tailwind IntelliSense).
 
-4. Instalación y configuración
-4.1 Prerrequisitos
-Antes de instalar el proyecto, es necesario contar con el siguiente entorno técnico:
-
-Node.js v18 o superior: Para ejecutar scripts y gestionar dependencias.
-npm o yarn: Gestor de paquetes para instalar módulos.
-Editor de código (VS Code recomendado): Para visualizar y modificar el código fuente.
-Extensiones recomendadas:
-ESLint
-Prettier
-Tailwind CSS IntelliSense
-TypeScript Hero
-Además, se recomienda tener conocimientos básicos de React, TypeScript y consumo de APIs REST para una comprensión completa del sistema.
-
-4.2 Clonado del repositorio
-Para obtener el código fuente del frontend, se debe clonar el repositorio desde GitHub:
-
+```bash
 git clone https://github.com/GuillermoGome2z/Frontend-Nominas.git
-
-cd Frontend-Nominas
-
-Este comando descargará todos los archivos del proyecto y ubicará al usuario dentro de la carpeta raíz.
-
-4.3 Instalación de dependencias
-Una vez clonado el repositorio, se deben instalar las dependencias necesarias para ejecutar el proyecto:
-
+cd Frontend-Nominas/sistema-nomina
 npm install
 
 Este comando instalará todos los módulos definidos en el archivo package.json, incluyendo React, Tailwind, Axios, React Query, React Hook Form, Zod, entre otros.
