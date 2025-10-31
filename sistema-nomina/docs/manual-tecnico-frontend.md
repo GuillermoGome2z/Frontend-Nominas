@@ -3,7 +3,7 @@
 ### FACULTAD DE INGENIERÍA EN SISTEMAS
 
 **Curso:** Desarrollo Web  
-**Catedrático:** Ng. Carmelo Estuardo Mayén Monterroso  
+**Catedrático:** Ing. Carmelo Estuardo Mayén Monterroso  
 
 **Proyecto Final**  
 # MANUAL TÉCNICO DEL FRONTEND – SISTEMA DE GESTIÓN DE NÓMINA
